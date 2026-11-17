@@ -8,6 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js untuk Dashboard Analitik -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (XLSX) untuk Export Excel Terformat -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF & AutoTable untuk Export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome untuk Ikon -->
@@ -545,9 +550,13 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, EWO..."
                                 class="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none">
-                            <button type="button" onclick="exportLaporanCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                            <button type="button" onclick="exportLaporanExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
                                 <i class="fa-solid fa-file-excel"></i>
-                                <span>Export CSV</span>
+                                <span>Export Excel</span>
+                            </button>
+                            <button type="button" onclick="exportLaporanPDF()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <span>Export PDF</span>
                             </button>
                         </div>
                     </div>
@@ -694,15 +703,261 @@
 
     <script>
         // =========================================================================
-        // 1. KONFIGURASI ENDPOINT API APPS SCRIPT & STATE KEAMANAN
+        // 8. EXPORT EXCEL (.XLSX) & EXPORT PDF SIAP PAKAI
         // =========================================================================
-        // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA (/exec)
+        function getFilteredLaporanForExport() {
+            const searchEl = document.getElementById('searchLaporan');
+            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+            return laporanSheet.filter(item =>
+                String(item.id).toLowerCase().includes(keyword) ||
+                String(item.pic).toLowerCase().includes(keyword) ||
+                String(item.namaPart).toLowerCase().includes(keyword) ||
+                String(item.nomorEwo).toLowerCase().includes(keyword)
+            );
+        }
+
+        function exportLaporanExcel() {
+            const dataToExport = getFilteredLaporanForExport();
+            if (dataToExport.length === 0) {
+                showModal({
+                    title: "Data Kosong",
+                    message: "Tidak ada data laporan untuk diekspor ke Excel.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            if (typeof XLSX === 'undefined') {
+                showModal({
+                    title: "Library Belum Siap",
+                    message: "Pustaka Excel sedang dimuat. Silakan coba beberapa detik lagi.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            const todayStr = new Date().toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric'
+            });
+            const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
+            const normalCount = dataToExport.length - abnormalCount;
+
+            // Susun struktur sheet rapi siap cetak (Judul Kop, Ringkasan, Header Tabel, Data)
+            const wsData = [
+                ["PT. DAYA ANUGRAH MULYA - LAPORAN CHECKLIST & INSPEKSI MESIN"],
+                [`Tanggal Cetak: ${todayStr} | Dicetak Oleh: ${currentUser ? currentUser.username : '-'} | Total Data: ${dataToExport.length} (Normal: ${normalCount}, Abnormality: ${abnormalCount})`],
+                [],
+                [
+                    "No",
+                    "ID Laporan",
+                    "PIC",
+                    "Tanggal Input",
+                    "Nama Part",
+                    "Standar Cek",
+                    "Metode Cek",
+                    "Status Abnormality",
+                    "Nomor EWO",
+                    "Diinput Oleh"
+                ]
+            ];
+
+            dataToExport.forEach((item, index) => {
+                wsData.push([
+                    index + 1,
+                    item.id || "-",
+                    item.pic || "-",
+                    formatTanggalRingkas(item.tanggalInput),
+                    item.namaPart || "-",
+                    item.standarCek || "-",
+                    item.metodeCek || "-",
+                    item.abnormality === "Ya" ? "Ya (Abnormality)" : "Tidak (Normal)",
+                    item.nomorEwo || "-",
+                    item.createdBy || "-"
+                ]);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            // Merge baris judul dan subjudul agar rapi
+            ws["!merges"] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } }
+            ];
+
+            // Atur lebar kolom otomatis agar tidak terpotong (###) saat dibuka di Excel
+            ws["!cols"] = [
+                { wch: 5 },   // No
+                { wch: 20 },  // ID Laporan
+                { wch: 18 },  // PIC
+                { wch: 18 },  // Tanggal Input
+                { wch: 32 },  // Nama Part
+                { wch: 38 },  // Standar Cek
+                { wch: 42 },  // Metode Cek
+                { wch: 20 },  // Status Abnormality
+                { wch: 18 },  // Nomor EWO
+                { wch: 24 }   // Diinput Oleh
+            ];
+
+            // Atur tinggi baris header dan baris data agar lega
+            ws["!rows"] = [
+                { hpt: 26 },
+                { hpt: 18 },
+                { hpt: 10 },
+                { hpt: 24 }
+            ];
+
+            // Aktifkan AutoFilter langsung pada baris header tabel (baris ke-4 / A4:J...)
+            ws["!autofilter"] = { ref: `A4:J${dataToExport.length + 4}` };
+
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Checklist");
+            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function exportLaporanPDF() {
+            const dataToExport = getFilteredLaporanForExport();
+            if (dataToExport.length === 0) {
+                showModal({
+                    title: "Data Kosong",
+                    message: "Tidak ada data laporan untuk diekspor ke PDF.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                showModal({
+                    title: "Library Belum Siap",
+                    message: "Pustaka PDF sedang dimuat. Silakan coba beberapa detik lagi.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+            const todayStr = new Date().toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
+            const normalCount = dataToExport.length - abnormalCount;
+
+            // Header Banner Perusahaan
+            doc.setFillColor(24, 152, 200);
+            doc.rect(14, 12, 269, 18, "F");
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(13);
+            doc.text("PT. DAYA ANUGRAH MULYA (DAM)", 18, 19.5);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9.5);
+            doc.text("LAPORAN PREVENTIVE MAINTENANCE & CHECKLIST INSPEKSI MESIN", 18, 25.5);
+
+            // Info Ringkasan di bawah header
+            doc.setTextColor(51, 65, 85);
+            doc.setFontSize(8.5);
+            doc.text(`Tanggal Cetak: ${todayStr} WIB   |   Dicetak Oleh: ${currentUser ? currentUser.username : '-'}`, 14, 36);
+            doc.text(`Total Inspeksi: ${dataToExport.length}   |   Normal: ${normalCount}   |   Abnormality: ${abnormalCount}`, 283, 36, { align: "right" });
+
+            const tableHeaders = [[
+                "No",
+                "ID Laporan",
+                "PIC",
+                "Tanggal",
+                "Nama Part",
+                "Standar Cek",
+                "Metode Cek",
+                "Abnormality",
+                "No. EWO"
+            ]];
+
+            const tableRows = dataToExport.map((item, idx) => [
+                idx + 1,
+                item.id || "-",
+                item.pic || "-",
+                formatTanggalRingkas(item.tanggalInput),
+                item.namaPart || "-",
+                item.standarCek || "-",
+                item.metodeCek || "-",
+                item.abnormality === "Ya" ? "Ya" : "Tidak",
+                item.nomorEwo || "-"
+            ]);
+
+            doc.autoTable({
+                startY: 40,
+                head: tableHeaders,
+                body: tableRows,
+                theme: "grid",
+                styles: {
+                    font: "helvetica",
+                    fontSize: 7.5,
+                    cellPadding: 2.5,
+                    valign: "top",
+                    textColor: [30, 41, 59],
+                    lineColor: [203, 213, 225],
+                    lineWidth: 0.2
+                },
+                headStyles: {
+                    fillColor: [30, 41, 59],
+                    textColor: [255, 255, 255],
+                    fontStyle: "bold",
+                    halign: "center",
+                    valign: "middle"
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                columnStyles: {
+                    0: { cellWidth: 9, halign: "center" },
+                    1: { cellWidth: 28, fontStyle: "bold" },
+                    2: { cellWidth: 22 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 36, fontStyle: "bold" },
+                    5: { cellWidth: 48 },
+                    6: { cellWidth: 57 },
+                    7: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+                    8: { cellWidth: 24, halign: "center" }
+                },
+                didParseCell: function (data) {
+                    if (data.section === "body" && data.column.index === 7) {
+                        if (data.cell.raw === "Ya") {
+                            data.cell.styles.textColor = [190, 18, 60];
+                            data.cell.styles.fillColor = [255, 228, 230];
+                        } else {
+                            data.cell.styles.textColor = [4, 120, 87];
+                        }
+                    }
+                },
+                didDrawPage: function (data) {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFontSize(8);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(
+                        `Halaman ${data.pageNumber} dari ${pageCount}`,
+                        283,
+                        doc.internal.pageSize.getHeight() - 8,
+                        { align: "right" }
+                    );
+                }
+            });
+
+            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(fileName);
+        }
+
+        // =========================================================================
+        // 1. KONFIGURASI ENDPOINT API GOOGLE APPS SCRIPT & STATE GLOBAL
+        // =========================================================================
         const DEFAULT_GAS_API_URL = "https://script.google.com/macros/s/AKfycbxSCa4saR9vmkFOvmNrjPJ1XsZ2Fmv8aM9B3kJSw-_9QclKCd1foUJRscnnh21zHEMu/exec";
-        const STORAGE_API_KEY = "CHECKLIST_MESIN_GAS_API_URL";
+        const STORAGE_API_KEY = "DAM_CHECKLIST_GAS_API_URL";
 
         function getGasApiUrl() {
             const saved = localStorage.getItem(STORAGE_API_KEY);
-            if (saved && saved.startsWith("https://script.google.com/")) {
+            if (saved && saved.trim().startsWith("https://script.google.com/")) {
                 return saved.trim();
             }
             return DEFAULT_GAS_API_URL.trim();
