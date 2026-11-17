@@ -166,8 +166,8 @@
                         </svg>
                     </div>
                     <div class="hidden sm:block border-l border-slate-200 pl-3">
-                        <h1 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">Checklist Mesin</h1>
-                        <p class="text-[11px] text-emerald-700 font-medium">Maintenance & Inspection System</p>
+                        <h1 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">CILT Execution</h1>
+                        <p class="text-[11px] text-emerald-700 font-medium">Autonomous Maintenance App</p>
                     </div>
                 </div>
 
@@ -341,8 +341,9 @@
                             </div>
                         </div>
                         <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 Notif</span>
-                        <!-- Tabel Khusus Pantauan Abnormality & Nomor Notif -->
-                        <div class="overflow-x-auto">
+                    </div>
+                    <!-- Tabel Khusus Pantauan Abnormality & Nomor Notif -->
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
@@ -486,6 +487,14 @@
                                         <label class="cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
                                             <i class="fa-solid fa-camera"></i>
                                             <span>Ambil Foto Sesudah</span>
+                                            <input type="file" id="inputFotoSesudah" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewSesudah', 'placeholderSesudah', 'sesudah')">
+                                        </label>
+                                        <p class="text-[11px] text-slate-500 mt-1.5">Dokumentasi kondisi part setelah pengecekan/pembersihan.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Abnormality, Nomor Notif & Keterangan -->
                         <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 sm:p-5">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
