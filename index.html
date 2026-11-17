@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Checklist & Inspeksi Mesin</title>
+    <title>CILT Execution - Autonomous Maintenance App</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js untuk Dashboard Analitik -->
@@ -63,6 +63,81 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL CLOSING NOMOR NOTIF (OPSI A: SUPERVISOR / ADMIN / MAINTENANCE) ==================== -->
+    <div id="closeNotifModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeNotifModalDialog()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200" onclick="event.stopPropagation()">
+            <div class="bg-emerald-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-lime-400 text-lg"></i>
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">Closing Nomor Notif</h3>
+                        <p class="text-[11px] text-emerald-200">Verifikasi penyelesaian perbaikan Maintenance</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeNotifModalDialog()" class="text-emerald-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="closeNotifForm" class="p-6 space-y-4">
+                <input type="hidden" id="closeNotifLapId" value="">
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-600">Nomor Notif:</span>
+                        <span id="closeNotifNoDisplay" class="font-mono font-bold text-rose-600 text-sm">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-600">Nama Part:</span>
+                        <span id="closeNotifPartDisplay" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="pt-1 border-t border-amber-200/70">
+                        <span class="font-semibold text-slate-600 block">Temuan Awal:</span>
+                        <span id="closeNotifKetAwalDisplay" class="text-slate-700">-</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Tindakan Perbaikan / Catatan Closing <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea id="closeNotifCatatan" rows="3" required placeholder="Contoh: Penggantian bearing baru, alignment ulang & tes running 15 menit normal..."
+                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none"></textarea>
+                </div>
+
+                <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/70">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">
+                        <i class="fa-solid fa-camera text-emerald-600 mr-1"></i> Foto Bukti Setelah Perbaikan <span class="text-slate-400 font-normal">(Opsional)</span>
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <div class="w-24 h-20 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                            <img id="previewClosePerbaikan" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Setelah Perbaikan')">
+                            <span id="placeholderClosePerbaikan" class="text-[10px] text-slate-400 text-center px-1">Belum ada foto</span>
+                        </div>
+                        <div class="flex-1">
+                            <label class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-xs transition">
+                                <i class="fa-solid fa-camera"></i>
+                                <span>Ambil / Pilih Foto Perbaikan</span>
+                                <input type="file" id="inputFotoPerbaikan" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewClosePerbaikan', 'placeholderClosePerbaikan', 'closePerbaikan')">
+                            </label>
+                            <p class="text-[11px] text-slate-500 mt-1">Dokumentasi kondisi part setelah selesai diperbaiki.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeNotifModalDialog()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitCloseNotif" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Konfirmasi Close Notif</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ==================== HALAMAN 1: LOGIN ==================== -->
     <div id="loginSection" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-emerald-900/20">
@@ -70,19 +145,12 @@
                 <div class="inline-flex items-center justify-center mx-auto mb-2">
                     <!-- Logo ENESIS GROUP -->
                     <svg viewBox="0 0 260 155" class="h-24 w-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enesis Group">
-                        <!-- Daun Kiri (Hijau Tua #008B45) -->
                         <path d="M123 14 C118 32, 102 45, 104 64 C105 76, 115 83, 122 93 C125 97, 127 101, 129 104 L133 101 C130 96, 126 90, 124 85 C135 76, 142 63, 141 47 C140 33, 131 22, 123 14 Z M123 32 C128 39, 132 47, 131 57 C130 66, 125 73, 118 78 C113 71, 111 63, 113 54 C115 45, 120 39, 123 32 Z" fill="#008B45"/>
-                        <!-- Daun Kanan (Hijau Muda #8CC63F) -->
                         <path d="M148 41 C150 53, 145 64, 137 73 C131 80, 128 88, 132 98 L136 96 C134 89, 137 83, 143 77 C153 68, 158 55, 148 41 Z" fill="#8CC63F"/>
-                        <!-- Titik Oranye (#F5A623) -->
                         <circle cx="146" cy="30" r="5.5" fill="#F5A623"/>
-                        <!-- Teks ENESIS -->
                         <text x="130" y="130" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600" letter-spacing="5" fill="#1e293b" text-anchor="middle">ENESIS</text>
-                        <!-- Gelombang Kiri -->
                         <path d="M46 144 Q64 148 78 144 T103 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
-                        <!-- Teks GROUP -->
                         <text x="130" y="147" font-family="Inter, Arial, sans-serif" font-size="11.5" font-weight="600" letter-spacing="2.5" fill="#1e293b" text-anchor="middle">GROUP</text>
-                        <!-- Gelombang Kanan -->
                         <path d="M157 144 Q173 140 187 144 T214 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
                     </svg>
                 </div>
@@ -219,7 +287,7 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-bold text-slate-900">Dashboard Monitoring & Performa Mesin</h2>
-                        <p class="text-xs text-slate-500">Ringkasan real-time kepatuhan inspeksi, distribusi PIC, dan temuan Abnormality / Notif</p>
+                        <p class="text-xs text-slate-500">Ringkasan real-time kepatuhan inspeksi, distribusi PIC, dan tindak lanjut Nomor Notif</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <label class="text-xs font-semibold text-slate-600">Periode:</label>
@@ -275,7 +343,7 @@
                         <div>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Abnormality / Notif</p>
                             <h3 id="kpiTotalAbnormal" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
-                            <p id="kpiSubAbnormal" class="text-[11px] text-slate-400 mt-1">Temuan perlu tindakan</p>
+                            <p id="kpiSubAbnormal" class="text-[11px] font-semibold text-slate-500 mt-1">0 Open | 0 Closed</p>
                         </div>
                         <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
                             <i class="fa-solid fa-triangle-exclamation"></i>
@@ -328,33 +396,41 @@
                     </div>
                 </div>
 
-                <!-- Tabel Khusus Pantauan Abnormality & Nomor Notif -->
+                <!-- Tabel Khusus Pantauan Abnormality & Closing Nomor Notif -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-6 py-4 bg-rose-50/70 border-b border-rose-100 flex flex-wrap items-center justify-between gap-2">
+                    <div class="px-6 py-4 bg-rose-50/70 border-b border-rose-100 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex items-center gap-2.5">
                             <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm">
                                 <i class="fa-solid fa-wrench"></i>
                             </span>
                             <div>
-                                <h3 class="font-bold text-slate-900 text-sm">Daftar Pantauan Abnormality & Nomor Notif</h3>
-                                <p class="text-[11px] text-slate-500">Menampilkan seluruh temuan berstatus "Ya" untuk tindak lanjut maintenance</p>
+                                <h3 class="font-bold text-slate-900 text-sm">Daftar Pantauan Abnormality & Closing Nomor Notif</h3>
+                                <p class="text-[11px] text-slate-500">Supervisor / Admin / Maintenance dapat menutup Notif yang sudah selesai diperbaiki</p>
                             </div>
                         </div>
-                        <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 Notif</span>
+                        <div class="flex items-center gap-2">
+                            <select id="dashNotifStatusFilter" onchange="renderDashboard()" class="px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-600 outline-none">
+                                <option value="ALL">Status: Semua</option>
+                                <option value="Open">Status: Open</option>
+                                <option value="Closed">Status: Closed</option>
+                            </select>
+                            <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 Notif</span>
+                        </div>
                     </div>
-                    <!-- Tabel Khusus Pantauan Abnormality & Nomor Notif -->
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
                                     <th class="py-3 px-4 whitespace-nowrap">Nomor Notif</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Status Notif</th>
                                     <th class="py-3 px-4 whitespace-nowrap">Tanggal</th>
                                     <th class="py-3 px-4 whitespace-nowrap">Nama Part</th>
                                     <th class="py-3 px-4 whitespace-nowrap">PIC</th>
-                                    <th class="py-3 px-4 min-w-[200px]">Standar Cek</th>
-                                    <th class="py-3 px-4 min-w-[200px]">Keterangan</th>
+                                    <th class="py-3 px-4 min-w-[200px]">Keterangan Temuan</th>
+                                    <th class="py-3 px-4 min-w-[220px]">Tindakan Perbaikan & Close</th>
                                     <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
-                                    <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Foto Perbaikan</th>
+                                    <th id="thDashNotifAksi" class="py-3 px-4 text-center whitespace-nowrap">Tindak Lanjut</th>
                                 </tr>
                             </thead>
                             <tbody id="dashAbnormalTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
@@ -435,7 +511,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Kolom Kanan: Image Part (Database) Lebih Besar & Jelas -->
+                                <!-- Kolom Kanan: Image Part (Database) -->
                                 <div class="lg:col-span-5">
                                     <div class="flex items-center justify-between mb-1.5">
                                         <label class="block text-xs font-semibold text-slate-700">Image Part (Database)</label>
@@ -554,7 +630,7 @@
                     <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h3 class="font-bold text-slate-800 text-base">Data Sheet Input Laporan</h3>
-                            <p class="text-xs text-slate-500">Rekap hasil inspeksi mesin yang tersimpan di Google Sheets</p>
+                            <p class="text-xs text-slate-500">Rekap hasil inspeksi mesin & status penyelesaian Nomor Notif</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, Notif..."
@@ -588,7 +664,9 @@
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Abnormality?</th>
                                     <th class="py-3.5 px-4 whitespace-nowrap">Nomor Notif</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Status Notif</th>
                                     <th class="py-3.5 px-4 min-w-[200px]">Keterangan</th>
+                                    <th class="py-3.5 px-4 min-w-[220px]">Catatan Perbaikan / Close</th>
                                     <th id="thLaporanAksi" class="py-3.5 px-4 text-center whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
@@ -779,16 +857,23 @@
 
         let databaseSheet = [];
         let laporanSheet = [];
-        let tempImages = { dbPart: "", sebelum: "", sesudah: "" };
+        let tempImages = { dbPart: "", sebelum: "", sesudah: "", closePerbaikan: "" };
         let currentUser = null;
         let sessionToken = null;
         let dashCharts = { daily: null, pie: null, topParts: null, pic: null };
 
-        // Hanya Supervisor & Admin yang dapat Edit, Delete, maupun Export Excel/PDF
+        // Hanya Supervisor & Admin yang dapat Edit/Delete database, Delete laporan, maupun Export Excel/PDF
         function isSupervisor() {
             if (!currentUser || !currentUser.role) return false;
             const r = String(currentUser.role).trim().toLowerCase();
             return r === "supervisor" || r === "admin";
+        }
+
+        // Opsi A: Supervisor, Admin, dan Maintenance berhak menutup Nomor Notif (Open -> Closed)
+        function canCloseNotif() {
+            if (!currentUser || !currentUser.role) return false;
+            const r = String(currentUser.role).trim().toLowerCase();
+            return r === "supervisor" || r === "admin" || r === "maintenance";
         }
 
         function safeSetText(id, text) {
@@ -883,7 +968,7 @@
         }
 
         // =========================================================================
-        // 3. SISTEM LOGIN, RBAC (USER HANYA INPUT) & LOGOUT
+        // 3. SISTEM LOGIN, RBAC (OPSI A) & LOGOUT
         // =========================================================================
         function togglePassword() {
             const input = document.getElementById('loginPassword');
@@ -905,21 +990,31 @@
 
         function applyRolePermissions() {
             const canManage = isSupervisor();
+            const hasNotifAction = canCloseNotif();
+
             if (canManage) {
                 safeRemoveClass('dbFormCard', 'hidden');
                 safeAddClass('dbReadOnlyBanner', 'hidden');
                 safeRemoveClass('laporanExportGroup', 'hidden');
-                safeRemoveClass('thLaporanAksi', 'hidden');
                 safeRemoveClass('thDatabaseAksi', 'hidden');
             } else {
-                // User / Operator / Teknisi: Hanya bisa input data laporan
-                // Tidak bisa edit/delete database & laporan, serta tidak bisa export Excel/PDF
                 safeAddClass('dbFormCard', 'hidden');
                 safeRemoveClass('dbReadOnlyBanner', 'hidden');
                 safeAddClass('laporanExportGroup', 'hidden');
-                safeAddClass('thLaporanAksi', 'hidden');
                 safeAddClass('thDatabaseAksi', 'hidden');
                 safeSetText('dbRoleNotice', currentUser ? currentUser.role : "User");
+            }
+
+            if (canManage || hasNotifAction) {
+                safeRemoveClass('thLaporanAksi', 'hidden');
+            } else {
+                safeAddClass('thLaporanAksi', 'hidden');
+            }
+
+            if (hasNotifAction) {
+                safeRemoveClass('thDashNotifAksi', 'hidden');
+            } else {
+                safeAddClass('thDashNotifAksi', 'hidden');
             }
         }
 
@@ -996,7 +1091,58 @@
         }
 
         // =========================================================================
-        // 4B. LOGIKA DASHBOARD MONITORING & GRAFIK (CHART.JS)
+        // 4B. LOGIKA CLOSING NOMOR NOTIF (OPSI A)
+        // =========================================================================
+        function openCloseNotifModal(laporanId) {
+            if (!canCloseNotif()) {
+                showModal({
+                    title: "Akses Ditolak",
+                    message: "Hanya Supervisor, Admin, atau tim Maintenance yang dapat melakukan Closing Nomor Notif.",
+                    type: "danger"
+                });
+                return;
+            }
+
+            const item = laporanSheet.find(l => l.id === laporanId);
+            if (!item) return;
+
+            safeSetValue('closeNotifLapId', item.id);
+            safeSetText('closeNotifNoDisplay', item.nomorEwo || '-');
+            safeSetText('closeNotifPartDisplay', item.namaPart || '-');
+            safeSetText('closeNotifKetAwalDisplay', item.keterangan || '-');
+            safeSetValue('closeNotifCatatan', '');
+
+            tempImages.closePerbaikan = "";
+            const previewEl = document.getElementById('previewClosePerbaikan');
+            if (previewEl) {
+                previewEl.src = "";
+                previewEl.classList.add('hidden');
+            }
+            safeRemoveClass('placeholderClosePerbaikan', 'hidden');
+
+            const inputEl = document.getElementById('inputFotoPerbaikan');
+            if (inputEl) inputEl.value = "";
+
+            safeRemoveClass('closeNotifModal', 'hidden');
+        }
+
+        function closeNotifModalDialog() {
+            safeAddClass('closeNotifModal', 'hidden');
+        }
+
+        function renderNotifStatusBadge(item) {
+            if (String(item.abnormality).toLowerCase() !== "ya") {
+                return `<span class="text-slate-400">-</span>`;
+            }
+            const isClosed = String(item.statusNotif || "").toLowerCase() === "closed";
+            if (isClosed) {
+                return `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-circle-check"></i> CLOSED</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1 bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-clock"></i> OPEN</span>`;
+        }
+
+        // =========================================================================
+        // 4C. LOGIKA DASHBOARD MONITORING & GRAFIK (CHART.JS)
         // =========================================================================
         function populateDashboardPicFilter() {
             const selectEl = document.getElementById('dashPicFilter');
@@ -1053,6 +1199,9 @@
             const filtered = getFilteredDashboardData();
             const totalInspeksi = filtered.length;
             const abnormalItems = filtered.filter(i => String(i.abnormality).toLowerCase() === 'ya');
+            const openNotifCount = abnormalItems.filter(i => String(i.statusNotif || 'Open').toLowerCase() !== 'closed').length;
+            const closedNotifCount = abnormalItems.length - openNotifCount;
+
             const normalCount = totalInspeksi - abnormalItems.length;
             const normalRate = totalInspeksi > 0 ? Math.round((normalCount / totalInspeksi) * 100) : 0;
 
@@ -1067,11 +1216,20 @@
             safeSetText('kpiNormalRate', `${normalRate}%`);
             safeSetText('kpiSubNormal', `${normalCount} pengecekan normal`);
             safeSetText('kpiTotalAbnormal', abnormalItems.length);
-            safeSetText('kpiSubAbnormal', `${abnormalItems.length} temuan Notif aktif`);
-            safeSetText('dashEwoCountBadge', `${abnormalItems.length} Notif`);
+            safeSetText('kpiSubAbnormal', `${openNotifCount} Open | ${closedNotifCount} Closed`);
+
+            const statusFilter = document.getElementById('dashNotifStatusFilter')?.value || 'ALL';
+            const filteredNotifItems = abnormalItems.filter(item => {
+                const st = String(item.statusNotif || 'Open').toLowerCase();
+                if (statusFilter === 'Open') return st !== 'closed';
+                if (statusFilter === 'Closed') return st === 'closed';
+                return true;
+            });
+
+            safeSetText('dashEwoCountBadge', `${openNotifCount} Open / ${abnormalItems.length} Total`);
 
             renderDashboardCharts(filtered);
-            renderDashboardAbnormalTable(abnormalItems);
+            renderDashboardAbnormalTable(filteredNotifItems);
         }
 
         function renderDashboardCharts(data) {
@@ -1211,37 +1369,54 @@
             const tbody = document.getElementById('dashAbnormalTableBody');
             if (!tbody) return;
 
+            const showActionCol = canCloseNotif();
+            const colSpan = showActionCol ? 10 : 9;
+
             if (abnormalItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Tidak ada temuan abnormality pada periode ini. Semua kondisi normal!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="py-8 text-center text-slate-400">Tidak ada data abnormality yang sesuai filter.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = abnormalItems.map(item => `
-                <tr class="hover:bg-rose-50/40 transition align-top">
-                    <td class="py-3 px-4 font-mono font-bold text-rose-600 whitespace-nowrap">${escapeHtml(item.nomorEwo || '-')}</td>
-                    <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formatTanggalRingkas(item.tanggalInput))}</td>
-                    <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
-                    <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${escapeHtml(item.pic)}</td>
-                    <td class="py-3 px-4 text-slate-600 min-w-[200px] leading-relaxed">${escapeHtml(item.standarCek || '-')}</td>
-                    <td class="py-3 px-4 text-slate-600 min-w-[200px] leading-relaxed">${escapeHtml(item.keterangan || '-')}</td>
-                    <td class="py-3 px-4 text-center">
-                        ${item.fotoSebelum
-                            ? `<img src="${resolveDriveImageUrl(item.fotoSebelum)}" onclick="openImagePreview(this.src, 'Foto Sebelum (${escapeHtml(item.nomorEwo)})')"
-                                loading="lazy" referrerpolicy="no-referrer"
-                                onerror="handleImgFallback(this, '${escapeHtml(item.fotoSebelum)}')"
-                                class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
-                            : `<span class="text-slate-400">-</span>`}
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        ${item.fotoSesudah
-                            ? `<img src="${resolveDriveImageUrl(item.fotoSesudah)}" onclick="openImagePreview(this.src, 'Foto Sesudah (${escapeHtml(item.nomorEwo)})')"
-                                loading="lazy" referrerpolicy="no-referrer"
-                                onerror="handleImgFallback(this, '${escapeHtml(item.fotoSesudah)}')"
-                                class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
-                            : `<span class="text-slate-400">-</span>`}
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = abnormalItems.map(item => {
+                const isClosed = String(item.statusNotif || "").toLowerCase() === "closed";
+                return `
+                    <tr class="${isClosed ? 'bg-emerald-50/20' : 'hover:bg-rose-50/40'} transition align-top">
+                        <td class="py-3 px-4 font-mono font-bold ${isClosed ? 'text-emerald-700' : 'text-rose-600'} whitespace-nowrap">${escapeHtml(item.nomorEwo || '-')}</td>
+                        <td class="py-3 px-4 text-center whitespace-nowrap">${renderNotifStatusBadge(item)}</td>
+                        <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formatTanggalRingkas(item.tanggalInput))}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
+                        <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${escapeHtml(item.pic)}</td>
+                        <td class="py-3 px-4 text-slate-600 min-w-[200px] leading-relaxed">${escapeHtml(item.keterangan || '-')}</td>
+                        <td class="py-3 px-4 text-slate-700 min-w-[220px] leading-relaxed">${escapeHtml(item.catatanClose || '-')}</td>
+                        <td class="py-3 px-4 text-center">
+                            ${item.fotoSebelum
+                                ? `<img src="${resolveDriveImageUrl(item.fotoSebelum)}" onclick="openImagePreview(this.src, 'Foto Sebelum (${escapeHtml(item.nomorEwo)})')"
+                                    loading="lazy" referrerpolicy="no-referrer"
+                                    onerror="handleImgFallback(this, '${escapeHtml(item.fotoSebelum)}')"
+                                    class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                                : `<span class="text-slate-400">-</span>`}
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            ${item.fotoPerbaikan
+                                ? `<img src="${resolveDriveImageUrl(item.fotoPerbaikan)}" onclick="openImagePreview(this.src, 'Foto Setelah Perbaikan (${escapeHtml(item.nomorEwo)})')"
+                                    loading="lazy" referrerpolicy="no-referrer"
+                                    onerror="handleImgFallback(this, '${escapeHtml(item.fotoPerbaikan)}')"
+                                    class="w-12 h-10 object-cover rounded-lg border border-emerald-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                                : `<span class="text-slate-400">-</span>`}
+                        </td>
+                        ${showActionCol ? `
+                            <td class="py-3 px-4 text-center whitespace-nowrap">
+                                ${isClosed
+                                    ? `<span class="text-[11px] font-semibold text-emerald-700"><i class="fa-solid fa-check-double mr-1"></i>Selesai</span>`
+                                    : `<button type="button" onclick="openCloseNotifModal('${item.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold shadow-xs transition inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-check"></i> Close Notif
+                                       </button>`
+                                }
+                            </td>
+                        ` : ``}
+                    </tr>
+                `;
+            }).join('');
         }
 
         // =========================================================================
@@ -1641,13 +1816,16 @@
             const searchEl = document.getElementById('searchLaporan');
             const keyword = searchEl ? searchEl.value.toLowerCase() : "";
             const canDelete = isSupervisor();
-            const colSpanCount = canDelete ? 13 : 12;
+            const canClose = canCloseNotif();
+            const showAksiCol = canDelete || canClose;
+            const colSpanCount = showAksiCol ? 15 : 14;
 
             const filtered = laporanSheet.filter(item =>
                 String(item.id).toLowerCase().includes(keyword) ||
                 String(item.pic).toLowerCase().includes(keyword) ||
                 String(item.namaPart).toLowerCase().includes(keyword) ||
                 String(item.nomorEwo).toLowerCase().includes(keyword) ||
+                String(item.statusNotif || "").toLowerCase().includes(keyword) ||
                 String(item.keterangan || "").toLowerCase().includes(keyword)
             );
 
@@ -1658,7 +1836,9 @@
 
             tbody.innerHTML = filtered.map(item => {
                 const formattedDate = formatTanggalRingkas(item.tanggalInput);
-                const isAbnormal = item.abnormality === "Ya";
+                const isAbnormal = String(item.abnormality).toLowerCase() === "ya";
+                const isClosed = String(item.statusNotif || "").toLowerCase() === "closed";
+
                 return `
                     <tr class="hover:bg-slate-50 transition align-top">
                         <td class="py-3.5 px-4 font-mono font-bold text-emerald-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
@@ -1701,17 +1881,38 @@
                                 : `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-check"></i> Tidak</span>`
                             }
                         </td>
-                        <td class="py-3.5 px-4 font-mono font-semibold whitespace-nowrap ${isAbnormal ? 'text-rose-600' : 'text-slate-400'}">
+                        <td class="py-3.5 px-4 font-mono font-semibold whitespace-nowrap ${isAbnormal ? (isClosed ? 'text-emerald-700' : 'text-rose-600') : 'text-slate-400'}">
                             ${escapeHtml(item.nomorEwo)}
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            ${renderNotifStatusBadge(item)}
                         </td>
                         <td class="py-3.5 px-4 text-slate-700 min-w-[200px] leading-relaxed whitespace-normal break-words">
                             ${escapeHtml(item.keterangan || '-')}
                         </td>
-                        ${canDelete ? `
-                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                                <button type="button" onclick="deleteLaporanItem('${item.id}')" title="Hapus Laporan" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
-                                    <i class="fa-solid fa-trash"></i>
+                        <td class="py-3.5 px-4 text-slate-700 min-w-[220px] leading-relaxed whitespace-normal break-words">
+                            <div>${escapeHtml(item.catatanClose || '-')}</div>
+                            ${item.fotoPerbaikan ? `
+                                <button type="button" onclick="openImagePreview('${resolveDriveImageUrl(item.fotoPerbaikan)}', 'Foto Setelah Perbaikan (${escapeHtml(item.nomorEwo)})')"
+                                    class="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:underline">
+                                    <i class="fa-solid fa-image"></i> Lihat Foto Perbaikan
                                 </button>
+                            ` : ''}
+                        </td>
+                        ${showAksiCol ? `
+                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    ${(canClose && isAbnormal && !isClosed) ? `
+                                        <button type="button" onclick="openCloseNotifModal('${item.id}')" title="Close Nomor Notif" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold transition inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-check"></i> Close
+                                        </button>
+                                    ` : ''}
+                                    ${canDelete ? `
+                                        <button type="button" onclick="deleteLaporanItem('${item.id}')" title="Hapus Laporan" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
                             </td>
                         ` : ``}
                     </tr>
@@ -1730,6 +1931,7 @@
                 String(item.pic).toLowerCase().includes(keyword) ||
                 String(item.namaPart).toLowerCase().includes(keyword) ||
                 String(item.nomorEwo).toLowerCase().includes(keyword) ||
+                String(item.statusNotif || "").toLowerCase().includes(keyword) ||
                 String(item.keterangan || "").toLowerCase().includes(keyword)
             );
         }
@@ -1770,7 +1972,7 @@
             const normalCount = dataToExport.length - abnormalCount;
 
             const wsData = [
-                ["ENESIS GROUP - LAPORAN CHECKLIST & INSPEKSI MESIN"],
+                ["ENESIS GROUP - PT. HERLINA INDAH | LAPORAN CILT EXECUTION"],
                 [`Tanggal Cetak: ${todayStr} | Dicetak Oleh: ${currentUser ? currentUser.username : '-'} | Total Data: ${dataToExport.length} (Normal: ${normalCount}, Abnormality: ${abnormalCount})`],
                 [],
                 [
@@ -1783,7 +1985,9 @@
                     "Metode Cek",
                     "Status Abnormality",
                     "Nomor Notif",
-                    "Keterangan",
+                    "Status Notif",
+                    "Keterangan Temuan",
+                    "Catatan Perbaikan / Close",
                     "Diinput Oleh"
                 ]
             ];
@@ -1799,7 +2003,9 @@
                     item.metodeCek || "-",
                     item.abnormality === "Ya" ? "Ya (Abnormality)" : "Tidak (Normal)",
                     item.nomorEwo || "-",
+                    item.statusNotif || "-",
                     item.keterangan || "-",
+                    item.catatanClose || "-",
                     item.createdBy || "-"
                 ]);
             });
@@ -1808,8 +2014,8 @@
             const ws = XLSX.utils.aoa_to_sheet(wsData);
 
             ws["!merges"] = [
-                { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
-                { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } }
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 12 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 12 } }
             ];
 
             ws["!cols"] = [
@@ -1817,13 +2023,15 @@
                 { wch: 20 },
                 { wch: 18 },
                 { wch: 18 },
-                { wch: 30 },
-                { wch: 35 },
-                { wch: 38 },
-                { wch: 20 },
-                { wch: 18 },
+                { wch: 28 },
                 { wch: 32 },
-                { wch: 24 }
+                { wch: 34 },
+                { wch: 18 },
+                { wch: 16 },
+                { wch: 14 },
+                { wch: 28 },
+                { wch: 35 },
+                { wch: 22 }
             ];
 
             ws["!rows"] = [
@@ -1833,10 +2041,10 @@
                 { hpt: 24 }
             ];
 
-            ws["!autofilter"] = { ref: `A4:K${dataToExport.length + 4}` };
+            ws["!autofilter"] = { ref: `A4:M${dataToExport.length + 4}` };
 
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan Checklist");
-            const fileName = `Laporan_Checklist_Mesin_ENESIS_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan CILT");
+            const fileName = `Laporan_CILT_Execution_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(wb, fileName);
         }
 
@@ -1884,11 +2092,11 @@
             doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
             doc.setFontSize(13);
-            doc.text("ENESIS GROUP", 18, 19.5);
+            doc.text("ENESIS GROUP - PT. HERLINA INDAH", 18, 19.5);
 
             doc.setFont("helvetica", "normal");
             doc.setFontSize(9.5);
-            doc.text("LAPORAN PREVENTIVE MAINTENANCE & CHECKLIST INSPEKSI MESIN", 18, 25.5);
+            doc.text("LAPORAN CILT EXECUTION & AUTONOMOUS MAINTENANCE", 18, 25.5);
 
             doc.setTextColor(51, 65, 85);
             doc.setFontSize(8.5);
@@ -1905,7 +2113,8 @@
                 "Metode Cek",
                 "Abnormality",
                 "No. Notif",
-                "Keterangan"
+                "Status",
+                "Catatan / Close"
             ]];
 
             const tableRows = dataToExport.map((item, idx) => [
@@ -1918,7 +2127,8 @@
                 item.metodeCek || "-",
                 item.abnormality === "Ya" ? "Ya" : "Tidak",
                 item.nomorEwo || "-",
-                item.keterangan || "-"
+                item.statusNotif || "-",
+                item.catatanClose && item.catatanClose !== "-" ? item.catatanClose : (item.keterangan || "-")
             ]);
 
             doc.autoTable({
@@ -1928,8 +2138,8 @@
                 theme: "grid",
                 styles: {
                     font: "helvetica",
-                    fontSize: 7,
-                    cellPadding: 2.2,
+                    fontSize: 6.8,
+                    cellPadding: 2,
                     valign: "top",
                     textColor: [30, 41, 59],
                     lineColor: [203, 213, 225],
@@ -1946,16 +2156,17 @@
                     fillColor: [240, 253, 244]
                 },
                 columnStyles: {
-                    0: { cellWidth: 8, halign: "center" },
-                    1: { cellWidth: 26, fontStyle: "bold" },
-                    2: { cellWidth: 20 },
-                    3: { cellWidth: 23 },
-                    4: { cellWidth: 32, fontStyle: "bold" },
-                    5: { cellWidth: 42 },
-                    6: { cellWidth: 48 },
-                    7: { cellWidth: 18, halign: "center", fontStyle: "bold" },
-                    8: { cellWidth: 22, halign: "center" },
-                    9: { cellWidth: 30 }
+                    0: { cellWidth: 7, halign: "center" },
+                    1: { cellWidth: 24, fontStyle: "bold" },
+                    2: { cellWidth: 18 },
+                    3: { cellWidth: 21 },
+                    4: { cellWidth: 28, fontStyle: "bold" },
+                    5: { cellWidth: 36 },
+                    6: { cellWidth: 40 },
+                    7: { cellWidth: 16, halign: "center", fontStyle: "bold" },
+                    8: { cellWidth: 20, halign: "center" },
+                    9: { cellWidth: 15, halign: "center", fontStyle: "bold" },
+                    10: { cellWidth: 44 }
                 },
                 didParseCell: function (data) {
                     if (data.section === "body" && data.column.index === 7) {
@@ -1964,6 +2175,15 @@
                             data.cell.styles.fillColor = [255, 228, 230];
                         } else {
                             data.cell.styles.textColor = [4, 120, 87];
+                        }
+                    }
+                    if (data.section === "body" && data.column.index === 9) {
+                        if (data.cell.raw === "Closed") {
+                            data.cell.styles.textColor = [4, 120, 87];
+                            data.cell.styles.fillColor = [209, 250, 229];
+                        } else if (data.cell.raw === "Open") {
+                            data.cell.styles.textColor = [190, 18, 60];
+                            data.cell.styles.fillColor = [255, 228, 230];
                         }
                     }
                 },
@@ -1980,7 +2200,7 @@
                 }
             });
 
-            const fileName = `Laporan_Checklist_Mesin_ENESIS_${new Date().toISOString().slice(0, 10)}.pdf`;
+            const fileName = `Laporan_CILT_Execution_${new Date().toISOString().slice(0, 10)}.pdf`;
             doc.save(fileName);
         }
 
@@ -2279,6 +2499,55 @@
                     }
                 });
             }
+
+            // 4. Form Closing Nomor Notif (Opsi A: Supervisor / Admin / Maintenance)
+            const closeNotifForm = document.getElementById('closeNotifForm');
+            if (closeNotifForm) {
+                closeNotifForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!canCloseNotif()) {
+                        showModal({ title: "Akses Ditolak", message: "Anda tidak memiliki izin untuk menutup Nomor Notif.", type: "danger" });
+                        return;
+                    }
+
+                    const lapId = document.getElementById('closeNotifLapId')?.value.trim() || "";
+                    const catatanPerbaikan = document.getElementById('closeNotifCatatan')?.value.trim() || "";
+
+                    if (!catatanPerbaikan) {
+                        showModal({ title: "Catatan Wajib Diisi", message: "Silakan isi tindakan perbaikan sebelum menutup Notif.", type: "warning" });
+                        return;
+                    }
+
+                    const btnSubmit = document.getElementById('btnSubmitCloseNotif');
+                    const originalHtml = btnSubmit ? btnSubmit.innerHTML : "Konfirmasi Close Notif";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('closeNotifRecord', sessionToken, {
+                            id: lapId,
+                            catatanPerbaikan: catatanPerbaikan,
+                            fotoPerbaikan: tempImages.closePerbaikan || ""
+                        });
+                        closeNotifModalDialog();
+                        await loadDataFromServer();
+                        showModal({
+                            title: "Nomor Notif Ditutup",
+                            message: (res && res.message) || "Status Nomor Notif berhasil diubah menjadi Closed.",
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Closing Notif", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalHtml;
+                        }
+                    }
+                });
+            }
         }
 
         if (document.readyState === 'loading') {
@@ -2289,3 +2558,6 @@
     </script>
 </body>
 </html>
+```
+
+File **`index.html`** di atas sudah siap diunggah ke GitHub Pages (jangan lupa isi `DEFAULT_GAS_API_URL` dengan URL `/exec` Google Apps Script Anda).
