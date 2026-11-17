@@ -64,39 +64,45 @@
     </div>
 
     <!-- ==================== HALAMAN 1: LOGIN ==================== -->
-    <div id="loginSection" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="bg-blue-600 p-6 text-white text-center relative">
-                <div class="inline-flex items-center justify-center mx-auto mb-3">
-                    <!-- Logo DAM - PT. Daya Anugrah Mulya -->
-                    <svg viewBox="0 0 320 92" class="h-12 w-auto drop-shadow-sm" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DAM PT. Daya Anugrah Mulya">
-                        <path d="M18 14 C34 8, 66 8, 82 14 L82 22 C66 17, 34 17, 18 22 Z" fill="#cbd5e1"/>
-                        <path d="M18 78 C34 84, 66 84, 82 78 L82 70 C66 75, 34 75, 18 70 Z" fill="#cbd5e1"/>
-                        <path d="M16 20 C34 15, 66 15, 84 20 C88 36, 88 56, 84 72 C66 77, 34 77, 16 72 C12 56, 12 36, 16 20 Z" fill="#38bdf8"/>
-                        <path d="M32 33 H41 V56 C41 59, 39 60, 36.5 60 C34 60, 32 58, 32 54 Z" fill="#ffffff"/>
-                        <path d="M45.5 33 H54.5 V60 H45.5 Z" fill="#ffffff"/>
-                        <path d="M59 33 H68 V54 C68 58, 66 60, 63.5 60 C61 60, 59 59, 59 56 Z" fill="#ffffff"/>
-                        <line x1="104" y1="12" x2="104" y2="80" stroke="rgba(255,255,255,0.45)" stroke-width="1.8"/>
-                        <text x="120" y="52" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="700" letter-spacing="2" fill="#ffffff">DAM</text>
-                        <text x="121" y="73" font-family="Inter, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#e0f2fe">PT. Daya Anugrah Mulya</text>
+    <div id="loginSection" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-emerald-900/20">
+            <div class="bg-gradient-to-b from-white via-emerald-50/40 to-emerald-50/80 border-b border-emerald-100 p-6 text-center relative">
+                <div class="inline-flex items-center justify-center mx-auto mb-2">
+                    <!-- Logo ENESIS GROUP -->
+                    <svg viewBox="0 0 260 155" class="h-24 w-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enesis Group">
+                        <!-- Daun Kiri (Hijau Tua #008B45) -->
+                        <path d="M123 14 C118 32, 102 45, 104 64 C105 76, 115 83, 122 93 C125 97, 127 101, 129 104 L133 101 C130 96, 126 90, 124 85 C135 76, 142 63, 141 47 C140 33, 131 22, 123 14 Z M123 32 C128 39, 132 47, 131 57 C130 66, 125 73, 118 78 C113 71, 111 63, 113 54 C115 45, 120 39, 123 32 Z" fill="#008B45"/>
+                        <!-- Daun Kanan (Hijau Muda #8CC63F) -->
+                        <path d="M148 41 C150 53, 145 64, 137 73 C131 80, 128 88, 132 98 L136 96 C134 89, 137 83, 143 77 C153 68, 158 55, 148 41 Z" fill="#8CC63F"/>
+                        <!-- Titik Oranye (#F5A623) -->
+                        <circle cx="146" cy="30" r="5.5" fill="#F5A623"/>
+                        <!-- Teks ENESIS -->
+                        <text x="130" y="130" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600" letter-spacing="5" fill="#1e293b" text-anchor="middle">ENESIS</text>
+                        <!-- Gelombang Kiri -->
+                        <path d="M46 144 Q64 148 78 144 T103 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                        <!-- Teks GROUP -->
+                        <text x="130" y="147" font-family="Inter, Arial, sans-serif" font-size="11.5" font-weight="600" letter-spacing="2.5" fill="#1e293b" text-anchor="middle">GROUP</text>
+                        <!-- Gelombang Kanan -->
+                        <path d="M157 144 Q173 140 187 144 T214 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
                     </svg>
                 </div>
-                <h1 class="text-xl font-bold tracking-tight">E-CHECKLIST MESIN</h1>
-                <p class="text-blue-100 text-xs mt-1">Sistem Preventive Maintenance & Inspeksi Harian</p>
+                <h1 class="text-lg font-bold tracking-tight text-emerald-900">CILT Execution</h1>
+                <p class="text-emerald-700/80 text-xs mt-0.5">Autonomous Maintenance App</p>
+                <p class="text-slate-600 font-semibold text-xs mt-1">PT. Herlina Indah</p>
             </div>
 
             <!-- Panel Konfigurasi Endpoint API Apps Script -->
             <div id="apiConfigPanel" class="hidden bg-slate-50 border-b border-slate-200 p-4 space-y-2.5">
                 <div class="flex items-center justify-between">
                     <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                        <i class="fa-solid fa-link text-blue-600 mr-1"></i> URL Web App Google Apps Script
+                        <i class="fa-solid fa-link text-emerald-600 mr-1"></i> URL Web App Google Apps Script
                     </label>
                     <span id="apiStatusBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Belum Diatur</span>
                 </div>
                 <input type="url" id="gasApiUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
-                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-emerald-600 outline-none">
                 <div class="flex justify-end gap-2">
-                    <button type="button" onclick="saveGasApiUrl()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">
+                    <button type="button" onclick="saveGasApiUrl()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
                         Simpan Endpoint
                     </button>
                 </div>
@@ -110,7 +116,7 @@
                             <i class="fa-solid fa-user"></i>
                         </span>
                         <input type="text" id="loginUsername" required placeholder="Masukkan nama pengguna..."
-                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition">
                     </div>
                 </div>
 
@@ -121,7 +127,7 @@
                             <i class="fa-solid fa-lock"></i>
                         </span>
                         <input type="password" id="loginPassword" required placeholder="Masukkan password..."
-                            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition">
                         <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
                             <i id="eyeIcon" class="fa-solid fa-eye"></i>
                         </button>
@@ -133,7 +139,7 @@
                     <span id="loginErrorText">Nama atau password salah!</span>
                 </div>
 
-                <button type="submit" id="btnLoginSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2">
+                <button type="submit" id="btnLoginSubmit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
                     <span>Masuk ke Aplikasi</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -144,35 +150,34 @@
     <!-- ==================== HALAMAN 2: DASHBOARD UTAMA ==================== -->
     <div id="appSection" class="hidden flex-1 flex flex-col">
         <!-- Top Navbar -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <header class="bg-white border-b border-emerald-100 sticky top-0 z-30 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="flex items-center justify-center">
-                        <svg viewBox="0 0 320 92" class="h-9 w-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DAM PT. Daya Anugrah Mulya">
-                            <path d="M18 14 C34 8, 66 8, 82 14 L82 22 C66 17, 34 17, 18 22 Z" fill="#6b7280"/>
-                            <path d="M18 78 C34 84, 66 84, 82 78 L82 70 C66 75, 34 75, 18 70 Z" fill="#6b7280"/>
-                            <path d="M16 20 C34 15, 66 15, 84 20 C88 36, 88 56, 84 72 C66 77, 34 77, 16 72 C12 56, 12 36, 16 20 Z" fill="#1898c8"/>
-                            <path d="M32 33 H41 V56 C41 59, 39 60, 36.5 60 C34 60, 32 58, 32 54 Z" fill="#ffffff"/>
-                            <path d="M45.5 33 H54.5 V60 H45.5 Z" fill="#ffffff"/>
-                            <path d="M59 33 H68 V54 C68 58, 66 60, 63.5 60 C61 60, 59 59, 59 56 Z" fill="#ffffff"/>
-                            <line x1="104" y1="12" x2="104" y2="80" stroke="#6b7280" stroke-width="1.8"/>
-                            <text x="120" y="52" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="600" letter-spacing="2" fill="#4b5563">DAM</text>
-                            <text x="121" y="73" font-family="Inter, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#6b7280">PT. Daya Anugrah Mulya</text>
+                        <!-- Logo ENESIS GROUP Navbar -->
+                        <svg viewBox="0 0 260 155" class="h-12 w-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enesis Group">
+                            <path d="M123 14 C118 32, 102 45, 104 64 C105 76, 115 83, 122 93 C125 97, 127 101, 129 104 L133 101 C130 96, 126 90, 124 85 C135 76, 142 63, 141 47 C140 33, 131 22, 123 14 Z M123 32 C128 39, 132 47, 131 57 C130 66, 125 73, 118 78 C113 71, 111 63, 113 54 C115 45, 120 39, 123 32 Z" fill="#008B45"/>
+                            <path d="M148 41 C150 53, 145 64, 137 73 C131 80, 128 88, 132 98 L136 96 C134 89, 137 83, 143 77 C153 68, 158 55, 148 41 Z" fill="#8CC63F"/>
+                            <circle cx="146" cy="30" r="5.5" fill="#F5A623"/>
+                            <text x="130" y="130" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600" letter-spacing="5" fill="#1e293b" text-anchor="middle">ENESIS</text>
+                            <path d="M46 144 Q64 148 78 144 T103 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                            <text x="130" y="147" font-family="Inter, Arial, sans-serif" font-size="11.5" font-weight="600" letter-spacing="2.5" fill="#1e293b" text-anchor="middle">GROUP</text>
+                            <path d="M157 144 Q173 140 187 144 T214 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
                         </svg>
                     </div>
                     <div class="hidden sm:block border-l border-slate-200 pl-3">
                         <h1 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">Checklist Mesin</h1>
-                        <p class="text-[11px] text-slate-500">Maintenance & Inspection System</p>
+                        <p class="text-[11px] text-emerald-700 font-medium">Maintenance & Inspection System</p>
                     </div>
                 </div>
 
                 <!-- Navigasi User & Sync -->
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <div class="hidden md:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
-                        <i class="fa-solid fa-user-shield text-blue-600"></i>
+                    <div class="hidden md:flex items-center gap-2 bg-emerald-50/70 border border-emerald-200/70 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+                        <i class="fa-solid fa-user-shield text-emerald-600"></i>
                         <span>Login: <strong id="currentUserDisplay">User</strong></span>
                     </div>
-                    <button type="button" onclick="loadDataFromServer()" title="Muat Ulang Data dari Google Sheets" class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <button type="button" onclick="loadDataFromServer()" title="Muat Ulang Data dari Google Sheets" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
                         <i id="syncIcon" class="fa-solid fa-rotate"></i>
                         <span class="hidden sm:inline">Sync Sheets</span>
                     </button>
@@ -184,18 +189,18 @@
             </div>
 
             <!-- Sub-Navbar (Sheet Tabs) -->
-            <div class="bg-slate-50 border-t border-slate-200">
+            <div class="bg-emerald-50/40 border-t border-emerald-100">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 overflow-x-auto py-2">
-                    <button type="button" onclick="switchTab('dashboard')" id="tabBtnDashboard" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-slate-200/70">
+                    <button type="button" onclick="switchTab('dashboard')" id="tabBtnDashboard" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-emerald-100/60">
                         <i class="fa-solid fa-chart-pie"></i>
                         <span>Dashboard Monitoring</span>
                     </button>
-                    <button type="button" onclick="switchTab('laporan')" id="tabBtnLaporan" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-blue-600 text-white shadow-sm">
+                    <button type="button" onclick="switchTab('laporan')" id="tabBtnLaporan" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-emerald-600 text-white shadow-sm">
                         <i class="fa-solid fa-clipboard-check"></i>
                         <span>Sheet Input Laporan</span>
                         <span id="badgeLaporanCount" class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">0</span>
                     </button>
-                    <button type="button" onclick="switchTab('database')" id="tabBtnDatabase" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-slate-200/70">
+                    <button type="button" onclick="switchTab('database')" id="tabBtnDatabase" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-emerald-100/60">
                         <i class="fa-solid fa-database"></i>
                         <span>Sheet Database</span>
                         <span id="badgeDbCount" class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full">0</span>
@@ -214,18 +219,18 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <h2 class="text-lg font-bold text-slate-900">Dashboard Monitoring & Performa Mesin</h2>
-                        <p class="text-xs text-slate-500">Ringkasan real-time kepatuhan inspeksi, distribusi PIC, dan temuan Abnormality / EWO</p>
+                        <p class="text-xs text-slate-500">Ringkasan real-time kepatuhan inspeksi, distribusi PIC, dan temuan Abnormality / Notif</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <label class="text-xs font-semibold text-slate-600">Periode:</label>
-                        <select id="dashPeriodFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <select id="dashPeriodFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-600 outline-none">
                             <option value="ALL">Semua Waktu</option>
                             <option value="TODAY">Hari Ini</option>
                             <option value="7D">7 Hari Terakhir</option>
                             <option value="30D">30 Hari Terakhir</option>
                             <option value="MONTH">Bulan Ini</option>
                         </select>
-                        <select id="dashPicFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <select id="dashPicFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-600 outline-none">
                             <option value="ALL">Semua PIC</option>
                         </select>
                     </div>
@@ -239,7 +244,7 @@
                             <h3 id="kpiTotalInspeksi" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
                             <p id="kpiSubInspeksi" class="text-[11px] text-slate-400 mt-1">Laporan tercatat</p>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
                             <i class="fa-solid fa-clipboard-list"></i>
                         </div>
                     </div>
@@ -247,10 +252,10 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
                         <div>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cakupan Part</p>
-                            <h3 id="kpiCompletionRate" class="text-2xl font-bold text-indigo-600 mt-1">0%</h3>
+                            <h3 id="kpiCompletionRate" class="text-2xl font-bold text-lime-600 mt-1">0%</h3>
                             <p id="kpiSubCompletion" class="text-[11px] text-slate-400 mt-1">0 dari 0 part database</p>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center text-xl">
                             <i class="fa-solid fa-bullseye"></i>
                         </div>
                     </div>
@@ -258,21 +263,21 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
                         <div>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kondisi Normal</p>
-                            <h3 id="kpiNormalRate" class="text-2xl font-bold text-emerald-600 mt-1">0%</h3>
+                            <h3 id="kpiNormalRate" class="text-2xl font-bold text-emerald-700 mt-1">0%</h3>
                             <p id="kpiSubNormal" class="text-[11px] text-slate-400 mt-1">0 pengecekan normal</p>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl">
                             <i class="fa-solid fa-circle-check"></i>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Abnormality / EWO</p>
-                            <h3 id="kpiTotalAbnormal" class="text-2xl font-bold text-rose-600 mt-1">0</h3>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Abnormality / Notif</p>
+                            <h3 id="kpiTotalAbnormal" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
                             <p id="kpiSubAbnormal" class="text-[11px] text-slate-400 mt-1">Temuan perlu tindakan</p>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
                             <i class="fa-solid fa-triangle-exclamation"></i>
                         </div>
                     </div>
@@ -323,7 +328,7 @@
                     </div>
                 </div>
 
-                <!-- Tabel Khusus Pantauan Abnormality & Nomor EWO -->
+                <!-- Tabel Khusus Pantauan Abnormality & Nomor Notif -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="px-6 py-4 bg-rose-50/70 border-b border-rose-100 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
@@ -331,22 +336,22 @@
                                 <i class="fa-solid fa-wrench"></i>
                             </span>
                             <div>
-                                <h3 class="font-bold text-slate-900 text-sm">Daftar Pantauan Abnormality & Nomor EWO</h3>
+                                <h3 class="font-bold text-slate-900 text-sm">Daftar Pantauan Abnormality & Nomor Notif</h3>
                                 <p class="text-[11px] text-slate-500">Menampilkan seluruh temuan berstatus "Ya" untuk tindak lanjut maintenance</p>
                             </div>
                         </div>
-                        <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 EWO</span>
-                    </div>
-
-                    <div class="overflow-x-auto">
+                        <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 Notif</span>
+                        <!-- Tabel Khusus Pantauan Abnormality & Nomor Notif -->
+                        <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                                    <th class="py-3 px-4 whitespace-nowrap">Nomor EWO</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">Nomor Notif</th>
                                     <th class="py-3 px-4 whitespace-nowrap">Tanggal</th>
                                     <th class="py-3 px-4 whitespace-nowrap">Nama Part</th>
                                     <th class="py-3 px-4 whitespace-nowrap">PIC</th>
-                                    <th class="py-3 px-4 min-w-[220px]">Standar Cek</th>
+                                    <th class="py-3 px-4 min-w-[200px]">Standar Cek</th>
+                                    <th class="py-3 px-4 min-w-[200px]">Keterangan</th>
                                     <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
                                     <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
                                 </tr>
@@ -364,12 +369,12 @@
                 
                 <!-- Card Form Input Laporan -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-800 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+                    <div class="bg-emerald-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
-                            <i class="fa-solid fa-pen-to-square text-blue-400"></i>
+                            <i class="fa-solid fa-pen-to-square text-lime-400"></i>
                             <h2 class="font-bold text-base">Form Input Laporan Checklist</h2>
                         </div>
-                        <span class="text-xs bg-slate-700 text-slate-200 px-3 py-1 rounded-lg">Auto-fill dari Sheet Database</span>
+                        <span class="text-xs bg-emerald-800 text-emerald-100 px-3 py-1 rounded-lg">Auto-fill dari Sheet Database</span>
                     </div>
 
                     <form id="laporanForm" class="p-6 space-y-6">
@@ -383,7 +388,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">PIC (Dari Database PIC) <span class="text-rose-500">*</span></label>
                                 <select id="lapPic" required
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                                     <option value="">-- Pilih PIC --</option>
                                 </select>
                             </div>
@@ -391,48 +396,55 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Input <span class="text-rose-500">*</span></label>
                                 <input type="datetime-local" id="lapTanggal" required
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                             </div>
                         </div>
 
                         <!-- Pilih Nama Part & Auto-Fill dari Database -->
-                        <div class="bg-blue-50/60 border border-blue-200/80 rounded-2xl p-4 sm:p-5 space-y-4">
+                        <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-5 sm:p-6 space-y-5">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold uppercase tracking-wider text-blue-700">
+                                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">
                                     <i class="fa-solid fa-link mr-1"></i> Data Referensi Part (Otomatis dari Sheet Database)
                                 </span>
                             </div>
 
-                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                                <div class="lg:col-span-4">
-                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Part <span class="text-rose-500">*</span></label>
-                                    <select id="lapNamaPart" required onchange="onPartSelected()"
-                                        class="w-full px-3.5 py-2.5 bg-white border border-blue-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
-                                        <option value="">-- Pilih Nama Part --</option>
-                                    </select>
-                                    <p class="text-[11px] text-slate-500 mt-1">Pilih part untuk mengisi otomatis standar, metode & foto acuan.</p>
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                <!-- Kolom Kiri: Nama Part, Standar Cek & Metode Cek -->
+                                <div class="lg:col-span-7 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Part <span class="text-rose-500">*</span></label>
+                                        <select id="lapNamaPart" required onchange="onPartSelected()"
+                                            class="w-full px-4 py-3 bg-white border border-emerald-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-600 outline-none shadow-sm">
+                                            <option value="">-- Pilih Nama Part --</option>
+                                        </select>
+                                        <p class="text-[11px] text-slate-500 mt-1">Pilih part untuk mengisi otomatis standar, metode & foto acuan.</p>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Standar Cek (Otomatis)</label>
+                                            <textarea id="lapStandarCek" rows="5" readonly placeholder="Otomatis terisi..."
+                                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm leading-relaxed text-slate-800 resize-y outline-none shadow-xs"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Metode Cek (Otomatis)</label>
+                                            <textarea id="lapMetodeCek" rows="5" readonly placeholder="Otomatis terisi..."
+                                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm leading-relaxed text-slate-800 resize-y outline-none shadow-xs"></textarea>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Standar Cek (Otomatis)</label>
-                                        <textarea id="lapStandarCek" rows="2" readonly placeholder="Otomatis terisi..."
-                                            class="w-full px-3 py-2 bg-white/80 border border-slate-300 rounded-xl text-xs text-slate-700 resize-none outline-none"></textarea>
+                                <!-- Kolom Kanan: Image Part (Database) Lebih Besar & Jelas -->
+                                <div class="lg:col-span-5">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <label class="block text-xs font-semibold text-slate-700">Image Part (Database)</label>
+                                        <span class="text-[11px] text-emerald-700 font-medium"><i class="fa-solid fa-magnifying-glass-plus mr-0.5"></i> Klik foto untuk memperbesar</span>
                                     </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Cek (Otomatis)</label>
-                                        <textarea id="lapMetodeCek" rows="2" readonly placeholder="Otomatis terisi..."
-                                            class="w-full px-3 py-2 bg-white/80 border border-slate-300 rounded-xl text-xs text-slate-700 resize-none outline-none"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="lg:col-span-3">
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image Part (Database)</label>
-                                    <div class="h-24 bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden relative">
-                                        <img id="lapDbImagePreview" src="" alt="Foto Part" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Referensi Foto Part (Database)')">
-                                        <div id="lapDbImagePlaceholder" class="text-center p-2 text-slate-400">
-                                            <i class="fa-regular fa-image text-xl mb-1 block"></i>
-                                            <span class="text-[11px]">Belum ada part dipilih</span>
+                                    <div class="h-56 sm:h-64 bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden relative shadow-xs">
+                                        <img id="lapDbImagePreview" src="" alt="Foto Part" class="hidden w-full h-full object-contain bg-slate-50 cursor-pointer p-1" onclick="openImagePreview(this.src, 'Referensi Foto Part (Database)')">
+                                        <div id="lapDbImagePlaceholder" class="text-center p-4 text-slate-400">
+                                            <i class="fa-regular fa-image text-3xl mb-1.5 block"></i>
+                                            <span class="text-xs">Belum ada part dipilih</span>
                                         </div>
                                     </div>
                                 </div>
@@ -443,7 +455,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
                                 <label class="block text-xs font-bold text-slate-700 mb-2">
-                                    <i class="fa-solid fa-camera text-blue-600 mr-1"></i> Foto Sebelum Cek (Kamera)
+                                    <i class="fa-solid fa-camera text-emerald-600 mr-1"></i> Foto Sebelum Cek (Kamera)
                                 </label>
                                 <div class="flex flex-col sm:flex-row items-center gap-4">
                                     <div class="w-full sm:w-32 h-28 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
@@ -474,31 +486,23 @@
                                         <label class="cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
                                             <i class="fa-solid fa-camera"></i>
                                             <span>Ambil Foto Sesudah</span>
-                                            <input type="file" id="inputFotoSesudah" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewSesudah', 'placeholderSesudah', 'sesudah')">
-                                        </label>
-                                        <p class="text-[11px] text-slate-500 mt-1.5">Dokumentasi kondisi part setelah pengecekan selesai.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Abnormality & Nomor EWO -->
+                        <!-- Abnormality, Nomor Notif & Keterangan -->
                         <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 sm:p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-800 mb-1.5">
-                                        Apakah ada abnormality? <span class="text-amber-700 font-normal">(Jika Ya tulis nomor EWO)</span> <span class="text-rose-500">*</span>
+                                        Apakah ada abnormality? <span class="text-amber-700 font-normal">(Jika Ya tulis nomor Notif)</span> <span class="text-rose-500">*</span>
                                     </label>
                                     <div class="flex gap-3">
                                         <label class="flex-1 cursor-pointer">
                                             <input type="radio" name="abnormalityStatus" value="Tidak" checked onchange="toggleEwoField()" class="peer hidden">
-                                            <div class="text-center py-2.5 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 transition">
+                                            <div class="text-center py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 transition">
                                                 <i class="fa-solid fa-check-circle mr-1"></i> Tidak (Normal)
                                             </div>
                                         </label>
                                         <label class="flex-1 cursor-pointer">
                                             <input type="radio" name="abnormalityStatus" value="Ya" onchange="toggleEwoField()" class="peer hidden">
-                                            <div class="text-center py-2.5 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-600 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 transition">
+                                            <div class="text-center py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-600 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 transition">
                                                 <i class="fa-solid fa-triangle-exclamation mr-1"></i> Ya (Abnormal)
                                             </div>
                                         </label>
@@ -507,10 +511,18 @@
 
                                 <div id="ewoContainer" class="opacity-50 pointer-events-none transition-opacity">
                                     <label class="block text-xs font-bold text-slate-800 mb-1.5">
-                                        Nomor EWO <span id="ewoRequiredStar" class="text-rose-500 hidden">*</span>
+                                        Nomor Notif <span id="ewoRequiredStar" class="text-rose-500 hidden">*</span>
                                     </label>
-                                    <input type="text" id="lapNomorEwo" disabled placeholder="Contoh: EWO-2026-0045"
+                                    <input type="text" id="lapNomorEwo" disabled placeholder="Contoh: NTF-2026-0045"
                                         class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-500 outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                                        Keterangan <span class="text-slate-400 font-normal">(Opsional)</span>
+                                    </label>
+                                    <input type="text" id="lapKeterangan" placeholder="Catatan tambahan hasil pengecekan..."
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                                 </div>
                             </div>
                         </div>
@@ -520,7 +532,7 @@
                             <button type="button" onclick="resetLaporanForm()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-sm font-semibold transition">
                                 Reset Form
                             </button>
-                            <button type="submit" id="btnSubmitLaporan" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md shadow-blue-600/20 transition flex items-center gap-2">
+                            <button type="submit" id="btnSubmitLaporan" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md shadow-emerald-600/20 transition flex items-center gap-2">
                                 <i class="fa-solid fa-floppy-disk"></i>
                                 <span>Simpan ke Sheet Input Laporan</span>
                             </button>
@@ -536,8 +548,8 @@
                             <p class="text-xs text-slate-500">Rekap hasil inspeksi mesin yang tersimpan di Google Sheets</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, EWO..."
-                                class="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, Notif..."
+                                class="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600 outline-none">
                             <!-- Tombol Export (Hanya tampil untuk Supervisor / Admin) -->
                             <div id="laporanExportGroup" class="hidden flex items-center gap-2">
                                 <button type="button" id="btnExportExcel" onclick="exportLaporanExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
@@ -566,7 +578,8 @@
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Abnormality?</th>
-                                    <th class="py-3.5 px-4 whitespace-nowrap">Nomor EWO</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Nomor Notif</th>
+                                    <th class="py-3.5 px-4 min-w-[200px]">Keterangan</th>
                                     <th id="thLaporanAksi" class="py-3.5 px-4 text-center whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
@@ -587,12 +600,12 @@
 
                 <!-- Form Tambah / Edit Master Database (Hanya Supervisor / Admin) -->
                 <div id="dbFormCard" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+                    <div class="bg-emerald-900 text-white px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
-                            <i class="fa-solid fa-database text-emerald-400"></i>
+                            <i class="fa-solid fa-database text-lime-400"></i>
                             <h2 id="dbFormTitle" class="font-bold text-base">Tambah Data Master (Sheet Database)</h2>
                         </div>
-                        <span class="text-xs bg-slate-700 text-slate-200 px-3 py-1 rounded-lg">Akses Khusus Supervisor</span>
+                        <span class="text-xs bg-emerald-800 text-emerald-100 px-3 py-1 rounded-lg">Akses Khusus Supervisor</span>
                     </div>
 
                     <form id="databaseForm" class="p-6 space-y-4">
@@ -602,31 +615,31 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">ID Part <span class="text-slate-400 font-normal">(Opsional / Auto)</span></label>
                                 <input type="text" id="dbPartIdInput" placeholder="Contoh: PART-001"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-emerald-600 outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Part <span class="text-rose-500">*</span></label>
                                 <input type="text" id="dbNamaPart" required placeholder="Contoh: Motor Conveyor Utama"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Cek <span class="text-rose-500">*</span></label>
                                 <input type="text" id="dbMetodeCek" required placeholder="Contoh: Visual & Termometer IR"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Standar Cek <span class="text-rose-500">*</span></label>
                                 <input type="text" id="dbStandarCek" required placeholder="Contoh: Suhu < 60°C, Tidak Berisik"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">PIC <span class="text-rose-500">*</span></label>
                                 <input type="text" id="dbPic" required placeholder="Contoh: Budi Santoso"
-                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
                             </div>
                         </div>
 
@@ -638,7 +651,7 @@
                             <div class="flex-1">
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Image (Foto Part Referensi)</label>
                                 <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
-                                    <i class="fa-solid fa-upload text-blue-600"></i>
+                                    <i class="fa-solid fa-upload text-emerald-600"></i>
                                     <span>Pilih / Ambil Foto Part</span>
                                     <input type="file" id="inputDbFotoPart" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'previewDbPart', 'placeholderDbPart', 'dbPart')">
                                 </label>
@@ -665,7 +678,7 @@
                             <p class="text-xs text-slate-500">Daftar master part, foto referensi, metode cek, standar cek, dan PIC</p>
                         </div>
                         <input type="text" id="searchDatabase" onkeyup="renderDatabaseTable()" placeholder="Cari Part, Metode, PIC..."
-                            class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                            class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600 outline-none">
                     </div>
 
                     <div class="overflow-x-auto">
@@ -943,8 +956,8 @@
             const btnLaporan = document.getElementById('tabBtnLaporan');
             const btnDatabase = document.getElementById('tabBtnDatabase');
 
-            const activeClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-blue-600 text-white shadow-sm";
-            const inactiveClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-slate-200/70";
+            const activeClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-emerald-600 text-white shadow-sm";
+            const inactiveClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-emerald-100/60";
 
             safeAddClass('viewDashboard', 'hidden');
             safeAddClass('viewLaporan', 'hidden');
@@ -1045,8 +1058,8 @@
             safeSetText('kpiNormalRate', `${normalRate}%`);
             safeSetText('kpiSubNormal', `${normalCount} pengecekan normal`);
             safeSetText('kpiTotalAbnormal', abnormalItems.length);
-            safeSetText('kpiSubAbnormal', `${abnormalItems.length} temuan EWO aktif`);
-            safeSetText('dashEwoCountBadge', `${abnormalItems.length} EWO`);
+            safeSetText('kpiSubAbnormal', `${abnormalItems.length} temuan Notif aktif`);
+            safeSetText('dashEwoCountBadge', `${abnormalItems.length} Notif`);
 
             renderDashboardCharts(filtered);
             renderDashboardAbnormalTable(abnormalItems);
@@ -1171,7 +1184,7 @@
                         datasets: [{
                             label: 'Total Pengecekan',
                             data: sortedPics.map(p => p[1]),
-                            backgroundColor: '#3b82f6',
+                            backgroundColor: '#008B45',
                             borderRadius: 6
                         }]
                     },
@@ -1190,7 +1203,7 @@
             if (!tbody) return;
 
             if (abnormalItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">Tidak ada temuan abnormality pada periode ini. Semua kondisi normal!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Tidak ada temuan abnormality pada periode ini. Semua kondisi normal!</td></tr>`;
                 return;
             }
 
@@ -1200,7 +1213,8 @@
                     <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formatTanggalRingkas(item.tanggalInput))}</td>
                     <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
                     <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${escapeHtml(item.pic)}</td>
-                    <td class="py-3 px-4 text-slate-600 min-w-[220px] leading-relaxed">${escapeHtml(item.standarCek || '-')}</td>
+                    <td class="py-3 px-4 text-slate-600 min-w-[200px] leading-relaxed">${escapeHtml(item.standarCek || '-')}</td>
+                    <td class="py-3 px-4 text-slate-600 min-w-[200px] leading-relaxed">${escapeHtml(item.keterangan || '-')}</td>
                     <td class="py-3 px-4 text-center">
                         ${item.fotoSebelum
                             ? `<img src="${resolveDriveImageUrl(item.fotoSebelum)}" onclick="openImagePreview(this.src, 'Foto Sebelum (${escapeHtml(item.nomorEwo)})')"
@@ -1376,7 +1390,7 @@
             tbody.innerHTML = filtered.map((item, idx) => `
                 <tr class="hover:bg-slate-50 transition">
                     <td class="py-3 px-4 font-semibold text-slate-500">${idx + 1}</td>
-                    <td class="py-3 px-4 font-mono font-semibold text-blue-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
+                    <td class="py-3 px-4 font-mono font-semibold text-emerald-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
                     <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(item.namaPart)}</td>
                     <td class="py-3 px-4 text-center">
                         ${item.image
@@ -1390,7 +1404,7 @@
                     <td class="py-3 px-4 text-slate-700">${escapeHtml(item.metodeCek)}</td>
                     <td class="py-3 px-4 text-slate-700">${escapeHtml(item.standarCek)}</td>
                     <td class="py-3 px-4">
-                        <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg font-medium">
+                        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-medium">
                             <i class="fa-solid fa-user text-[10px]"></i> ${escapeHtml(item.pic)}
                         </span>
                     </td>
@@ -1581,13 +1595,14 @@
             const searchEl = document.getElementById('searchLaporan');
             const keyword = searchEl ? searchEl.value.toLowerCase() : "";
             const canDelete = isSupervisor();
-            const colSpanCount = canDelete ? 12 : 11;
+            const colSpanCount = canDelete ? 13 : 12;
 
             const filtered = laporanSheet.filter(item =>
                 String(item.id).toLowerCase().includes(keyword) ||
                 String(item.pic).toLowerCase().includes(keyword) ||
                 String(item.namaPart).toLowerCase().includes(keyword) ||
-                String(item.nomorEwo).toLowerCase().includes(keyword)
+                String(item.nomorEwo).toLowerCase().includes(keyword) ||
+                String(item.keterangan || "").toLowerCase().includes(keyword)
             );
 
             if (filtered.length === 0) {
@@ -1600,7 +1615,7 @@
                 const isAbnormal = item.abnormality === "Ya";
                 return `
                     <tr class="hover:bg-slate-50 transition align-top">
-                        <td class="py-3.5 px-4 font-mono font-bold text-blue-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
+                        <td class="py-3.5 px-4 font-mono font-bold text-emerald-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
                         <td class="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">${escapeHtml(item.pic)}</td>
                         <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formattedDate)}</td>
                         <td class="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
@@ -1643,6 +1658,9 @@
                         <td class="py-3.5 px-4 font-mono font-semibold whitespace-nowrap ${isAbnormal ? 'text-rose-600' : 'text-slate-400'}">
                             ${escapeHtml(item.nomorEwo)}
                         </td>
+                        <td class="py-3.5 px-4 text-slate-700 min-w-[200px] leading-relaxed whitespace-normal break-words">
+                            ${escapeHtml(item.keterangan || '-')}
+                        </td>
                         ${canDelete ? `
                             <td class="py-3.5 px-4 text-center whitespace-nowrap">
                                 <button type="button" onclick="deleteLaporanItem('${item.id}')" title="Hapus Laporan" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
@@ -1665,7 +1683,8 @@
                 String(item.id).toLowerCase().includes(keyword) ||
                 String(item.pic).toLowerCase().includes(keyword) ||
                 String(item.namaPart).toLowerCase().includes(keyword) ||
-                String(item.nomorEwo).toLowerCase().includes(keyword)
+                String(item.nomorEwo).toLowerCase().includes(keyword) ||
+                String(item.keterangan || "").toLowerCase().includes(keyword)
             );
         }
 
@@ -1705,7 +1724,7 @@
             const normalCount = dataToExport.length - abnormalCount;
 
             const wsData = [
-                ["PT. DAYA ANUGRAH MULYA - LAPORAN CHECKLIST & INSPEKSI MESIN"],
+                ["ENESIS GROUP - LAPORAN CHECKLIST & INSPEKSI MESIN"],
                 [`Tanggal Cetak: ${todayStr} | Dicetak Oleh: ${currentUser ? currentUser.username : '-'} | Total Data: ${dataToExport.length} (Normal: ${normalCount}, Abnormality: ${abnormalCount})`],
                 [],
                 [
@@ -1717,7 +1736,8 @@
                     "Standar Cek",
                     "Metode Cek",
                     "Status Abnormality",
-                    "Nomor EWO",
+                    "Nomor Notif",
+                    "Keterangan",
                     "Diinput Oleh"
                 ]
             ];
@@ -1733,6 +1753,7 @@
                     item.metodeCek || "-",
                     item.abnormality === "Ya" ? "Ya (Abnormality)" : "Tidak (Normal)",
                     item.nomorEwo || "-",
+                    item.keterangan || "-",
                     item.createdBy || "-"
                 ]);
             });
@@ -1741,8 +1762,8 @@
             const ws = XLSX.utils.aoa_to_sheet(wsData);
 
             ws["!merges"] = [
-                { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
-                { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } }
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } }
             ];
 
             ws["!cols"] = [
@@ -1750,11 +1771,12 @@
                 { wch: 20 },
                 { wch: 18 },
                 { wch: 18 },
-                { wch: 32 },
+                { wch: 30 },
+                { wch: 35 },
                 { wch: 38 },
-                { wch: 42 },
                 { wch: 20 },
                 { wch: 18 },
+                { wch: 32 },
                 { wch: 24 }
             ];
 
@@ -1765,10 +1787,10 @@
                 { hpt: 24 }
             ];
 
-            ws["!autofilter"] = { ref: `A4:J${dataToExport.length + 4}` };
+            ws["!autofilter"] = { ref: `A4:K${dataToExport.length + 4}` };
 
             XLSX.utils.book_append_sheet(wb, ws, "Laporan Checklist");
-            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            const fileName = `Laporan_Checklist_Mesin_ENESIS_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(wb, fileName);
         }
 
@@ -1810,13 +1832,13 @@
             const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
             const normalCount = dataToExport.length - abnormalCount;
 
-            doc.setFillColor(24, 152, 200);
+            doc.setFillColor(0, 139, 69);
             doc.rect(14, 12, 269, 18, "F");
 
             doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
             doc.setFontSize(13);
-            doc.text("PT. DAYA ANUGRAH MULYA (DAM)", 18, 19.5);
+            doc.text("ENESIS GROUP", 18, 19.5);
 
             doc.setFont("helvetica", "normal");
             doc.setFontSize(9.5);
@@ -1836,7 +1858,8 @@
                 "Standar Cek",
                 "Metode Cek",
                 "Abnormality",
-                "No. EWO"
+                "No. Notif",
+                "Keterangan"
             ]];
 
             const tableRows = dataToExport.map((item, idx) => [
@@ -1848,7 +1871,8 @@
                 item.standarCek || "-",
                 item.metodeCek || "-",
                 item.abnormality === "Ya" ? "Ya" : "Tidak",
-                item.nomorEwo || "-"
+                item.nomorEwo || "-",
+                item.keterangan || "-"
             ]);
 
             doc.autoTable({
@@ -1858,33 +1882,34 @@
                 theme: "grid",
                 styles: {
                     font: "helvetica",
-                    fontSize: 7.5,
-                    cellPadding: 2.5,
+                    fontSize: 7,
+                    cellPadding: 2.2,
                     valign: "top",
                     textColor: [30, 41, 59],
                     lineColor: [203, 213, 225],
                     lineWidth: 0.2
                 },
                 headStyles: {
-                    fillColor: [30, 41, 59],
+                    fillColor: [6, 78, 59],
                     textColor: [255, 255, 255],
                     fontStyle: "bold",
                     halign: "center",
                     valign: "middle"
                 },
                 alternateRowStyles: {
-                    fillColor: [248, 250, 252]
+                    fillColor: [240, 253, 244]
                 },
                 columnStyles: {
-                    0: { cellWidth: 9, halign: "center" },
-                    1: { cellWidth: 28, fontStyle: "bold" },
-                    2: { cellWidth: 22 },
-                    3: { cellWidth: 25 },
-                    4: { cellWidth: 36, fontStyle: "bold" },
-                    5: { cellWidth: 48 },
-                    6: { cellWidth: 57 },
-                    7: { cellWidth: 20, halign: "center", fontStyle: "bold" },
-                    8: { cellWidth: 24, halign: "center" }
+                    0: { cellWidth: 8, halign: "center" },
+                    1: { cellWidth: 26, fontStyle: "bold" },
+                    2: { cellWidth: 20 },
+                    3: { cellWidth: 23 },
+                    4: { cellWidth: 32, fontStyle: "bold" },
+                    5: { cellWidth: 42 },
+                    6: { cellWidth: 48 },
+                    7: { cellWidth: 18, halign: "center", fontStyle: "bold" },
+                    8: { cellWidth: 22, halign: "center" },
+                    9: { cellWidth: 30 }
                 },
                 didParseCell: function (data) {
                     if (data.section === "body" && data.column.index === 7) {
@@ -1909,7 +1934,7 @@
                 }
             });
 
-            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.pdf`;
+            const fileName = `Laporan_Checklist_Mesin_ENESIS_${new Date().toISOString().slice(0, 10)}.pdf`;
             doc.save(fileName);
         }
 
@@ -1942,7 +1967,7 @@
                     iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-amber-100 text-amber-600";
                     iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
                 } else {
-                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-blue-100 text-blue-600";
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-100 text-emerald-600";
                     iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
                 }
             }
@@ -1961,7 +1986,7 @@
                 const okBtn = document.createElement('button');
                 okBtn.type = "button";
                 okBtn.className = `px-4 py-2 rounded-xl text-white text-xs font-semibold transition ${
-                    type === 'danger' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700'
+                    type === 'danger' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
                 }`;
                 okBtn.textContent = confirmText;
                 okBtn.onclick = () => {
@@ -2160,9 +2185,10 @@
                     const abnormality = statusEl ? statusEl.value : "Tidak";
                     const ewoInput = document.getElementById('lapNomorEwo');
                     const nomorEwo = abnormality === "Ya" ? (ewoInput ? ewoInput.value.trim() : "") : "-";
+                    const keterangan = document.getElementById('lapKeterangan')?.value.trim() || "-";
 
                     if (abnormality === "Ya" && !nomorEwo) {
-                        showModal({ title: "Nomor EWO Wajib Diisi", message: "Karena Abnormality = Ya, silakan isi Nomor EWO.", type: "danger" });
+                        showModal({ title: "Nomor Notif Wajib Diisi", message: "Karena Abnormality = Ya, silakan isi Nomor Notif.", type: "danger" });
                         return;
                     }
 
@@ -2184,7 +2210,8 @@
                         fotoSebelum: tempImages.sebelum || "",
                         fotoSesudah: tempImages.sesudah || "",
                         abnormality,
-                        nomorEwo
+                        nomorEwo,
+                        keterangan
                     };
 
                     try {
