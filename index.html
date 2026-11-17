@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Checklist & Inspeksi Mesin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Dashboard Analitik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- ==================== MODAL NOTIFIKASI & KONFIRMASI ==================== -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 transform transition-all">
+            <div class="flex items-center gap-3 mb-3">
+                <div id="modalIcon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg"></div>
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-900">Judul</h3>
+            </div>
+            <p id="modalMessage" class="text-sm text-slate-600 mb-6 leading-relaxed">Pesan</p>
+            <div id="modalActions" class="flex justify-end gap-2"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL PREVIEW GAMBAR BESAR ==================== -->
+    <div id="imagePreviewModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeImagePreview()">
+        <div class="relative max-w-3xl w-full bg-white rounded-2xl p-2 shadow-2xl" onclick="event.stopPropagation()">
+            <button type="button" onclick="closeImagePreview()" class="absolute -top-3 -right-3 bg-rose-600 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center hover:bg-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="previewModalImg" src="" alt="Preview" class="w-full max-h-[80vh] object-contain rounded-xl bg-slate-100">
+            <p id="previewModalCaption" class="text-center text-sm font-medium text-slate-700 py-2"></p>
+        </div>
+    </div>
+
+    <!-- ==================== HALAMAN 1: LOGIN ==================== -->
+    <div id="loginSection" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-blue-600 p-6 text-white text-center relative">
+                <button type="button" onclick="toggleApiConfigPanel()" title="Pengaturan URL API Google Apps Script"
+                    class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                </button>
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                    <i class="fa-solid fa-shield-halved text-3xl"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">E-CHECKLIST MESIN</h1>
+                <p class="text-blue-100 text-xs mt-1">Sistem Preventive Maintenance & Inspeksi Harian</p>
+            </div>
+
+            <!-- Panel Konfigurasi Endpoint API Apps Script -->
+            <div id="apiConfigPanel" class="hidden bg-slate-50 border-b border-slate-200 p-4 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                        <i class="fa-solid fa-link text-blue-600 mr-1"></i> URL Web App Google Apps Script
+                    </label>
+                    <span id="apiStatusBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Belum Diatur</span>
+                </div>
+                <input type="url" id="gasApiUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="saveGasApiUrl()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">
+                        Simpan Endpoint
+                    </button>
+                </div>
+            </div>
+
+            <form id="loginForm" class="p-6 sm:p-8 space-y-5" autocomplete="off">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nama Pengguna (Username)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUsername" required placeholder="Masukkan nama pengguna..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="Masukkan password..."
+                            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loginError" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs p-3 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="loginErrorText">Nama atau password salah!</span>
+                </div>
+
+                <button type="submit" id="btnLoginSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2">
+                    <span>Masuk ke Aplikasi</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <p class="text-[11px] text-center text-slate-400 pt-1">
+                    <i class="fa-solid fa-lock mr-1"></i> Sesi dilindungi token terenkripsi. Klik ikon <i class="fa-solid fa-gear"></i> di atas jika ingin mengatur URL API.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== HALAMAN 2: DASHBOARD UTAMA ==================== -->
+    <div id="appSection" class="hidden flex-1 flex flex-col">
+        <!-- Top Navbar -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-gears text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-slate-900 text-base sm:text-lg leading-tight">Checklist Mesin</h1>
+                        <p class="text-[11px] text-slate-500 hidden sm:block">GitHub Pages + Google Sheets API</p>
+                    </div>
+                </div>
+
+                <!-- Navigasi User & Sync -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="hidden md:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+                        <i class="fa-solid fa-user-shield text-blue-600"></i>
+                        <span>Login: <strong id="currentUserDisplay">User</strong></span>
+                    </div>
+                    <button type="button" onclick="loadDataFromServer()" title="Muat Ulang Data dari Google Sheets" class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i id="syncIcon" class="fa-solid fa-rotate"></i>
+                        <span class="hidden sm:inline">Sync Sheets</span>
+                    </button>
+                    <button type="button" onclick="handleLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-Navbar (Sheet Tabs) -->
+            <div class="bg-slate-50 border-t border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 overflow-x-auto py-2">
+                    <button type="button" onclick="switchTab('dashboard')" id="tabBtnDashboard" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-slate-200/70">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard Monitoring</span>
+                    </button>
+                    <button type="button" onclick="switchTab('laporan')" id="tabBtnLaporan" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-blue-600 text-white shadow-sm">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>Sheet Input Laporan</span>
+                        <span id="badgeLaporanCount" class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button type="button" onclick="switchTab('database')" id="tabBtnDatabase" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-slate-200/70">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Sheet Database</span>
+                        <span id="badgeDbCount" class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 0: DASHBOARD MONITORING & ANALITIK                                   -->
+            <!-- ========================================================================= -->
+            <div id="viewDashboard" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Dashboard Monitoring & Performa Mesin</h2>
+                        <p class="text-xs text-slate-500">Ringkasan real-time kepatuhan inspeksi, distribusi PIC, dan temuan Abnormality / EWO</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-600">Periode:</label>
+                        <select id="dashPeriodFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="ALL">Semua Waktu</option>
+                            <option value="TODAY">Hari Ini</option>
+                            <option value="7D">7 Hari Terakhir</option>
+                            <option value="30D">30 Hari Terakhir</option>
+                            <option value="MONTH">Bulan Ini</option>
+                        </select>
+                        <select id="dashPicFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="ALL">Semua PIC</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 4 Kartu KPI -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Inspeksi</p>
+                            <h3 id="kpiTotalInspeksi" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+                            <p id="kpiSubInspeksi" class="text-[11px] text-slate-400 mt-1">Laporan tercatat</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cakupan Part</p>
+                            <h3 id="kpiCompletionRate" class="text-2xl font-bold text-indigo-600 mt-1">0%</h3>
+                            <p id="kpiSubCompletion" class="text-[11px] text-slate-400 mt-1">0 dari 0 part database</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kondisi Normal</p>
+                            <h3 id="kpiNormalRate" class="text-2xl font-bold text-emerald-600 mt-1">0%</h3>
+                            <p id="kpiSubNormal" class="text-[11px] text-slate-400 mt-1">0 pengecekan normal</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Abnormality / EWO</p>
+                            <h3 id="kpiTotalAbnormal" class="text-2xl font-bold text-rose-600 mt-1">0</h3>
+                            <p id="kpiSubAbnormal" class="text-[11px] text-slate-400 mt-1">Temuan perlu tindakan</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Analitik -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Tren Inspeksi & Temuan Abnormality Harian</h3>
+                            <p class="text-[11px] text-slate-400">Perbandingan aktivitas pengecekan normal vs abnormal per tanggal</p>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chartDailyTrend"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Rasio Normal vs Abnormality</h3>
+                            <p class="text-[11px] text-slate-400">Proporsi status kesehatan mesin</p>
+                        </div>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chartStatusPie"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Top 5 Part Paling Sering Abnormality</h3>
+                            <p class="text-[11px] text-slate-400">Identifikasi komponen kritis yang memerlukan perhatian khusus</p>
+                        </div>
+                        <div class="h-60 relative">
+                            <canvas id="chartTopAbnormalParts"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Aktivitas Inspeksi per PIC</h3>
+                            <p class="text-[11px] text-slate-400">Jumlah checklist yang diselesaikan oleh masing-masing PIC</p>
+                        </div>
+                        <div class="h-60 relative">
+                            <canvas id="chartPicPerformance"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Khusus Pantauan Abnormality & Nomor EWO -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-rose-50/70 border-b border-rose-100 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-wrench"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">Daftar Pantauan Abnormality & Nomor EWO</h3>
+                                <p class="text-[11px] text-slate-500">Menampilkan seluruh temuan berstatus "Ya" untuk tindak lanjut maintenance</p>
+                            </div>
+                        </div>
+                        <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 EWO</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <th class="py-3 px-4 whitespace-nowrap">Nomor EWO</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">Tanggal</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">Nama Part</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">PIC</th>
+                                    <th class="py-3 px-4 min-w-[220px]">Standar Cek</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashAbnormalTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 1: SHEET INPUT LAPORAN                                               -->
+            <!-- ========================================================================= -->
+            <div id="viewLaporan" class="space-y-6">
+                
+                <!-- Card Form Input Laporan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-800 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-pen-to-square text-blue-400"></i>
+                            <h2 class="font-bold text-base">Form Input Laporan Checklist</h2>
+                        </div>
+                        <span class="text-xs bg-slate-700 text-slate-200 px-3 py-1 rounded-lg">Auto-fill dari Sheet Database</span>
+                    </div>
+
+                    <form id="laporanForm" class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">ID Laporan (Otomatis)</label>
+                                <input type="text" id="lapId" readonly
+                                    class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-sm font-mono font-semibold text-slate-700 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">PIC (Dari Database PIC) <span class="text-rose-500">*</span></label>
+                                <select id="lapPic" required
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <option value="">-- Pilih PIC --</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Input <span class="text-rose-500">*</span></label>
+                                <input type="datetime-local" id="lapTanggal" required
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Pilih Nama Part & Auto-Fill dari Database -->
+                        <div class="bg-blue-50/60 border border-blue-200/80 rounded-2xl p-4 sm:p-5 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-blue-700">
+                                    <i class="fa-solid fa-link mr-1"></i> Data Referensi Part (Otomatis dari Sheet Database)
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                                <div class="lg:col-span-4">
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Part <span class="text-rose-500">*</span></label>
+                                    <select id="lapNamaPart" required onchange="onPartSelected()"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-blue-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                                        <option value="">-- Pilih Nama Part --</option>
+                                    </select>
+                                    <p class="text-[11px] text-slate-500 mt-1">Pilih part untuk mengisi otomatis standar, metode & foto acuan.</p>
+                                </div>
+
+                                <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Standar Cek (Otomatis)</label>
+                                        <textarea id="lapStandarCek" rows="2" readonly placeholder="Otomatis terisi..."
+                                            class="w-full px-3 py-2 bg-white/80 border border-slate-300 rounded-xl text-xs text-slate-700 resize-none outline-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Cek (Otomatis)</label>
+                                        <textarea id="lapMetodeCek" rows="2" readonly placeholder="Otomatis terisi..."
+                                            class="w-full px-3 py-2 bg-white/80 border border-slate-300 rounded-xl text-xs text-slate-700 resize-none outline-none"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="lg:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image Part (Database)</label>
+                                    <div class="h-24 bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden relative">
+                                        <img id="lapDbImagePreview" src="" alt="Foto Part" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Referensi Foto Part (Database)')">
+                                        <div id="lapDbImagePlaceholder" class="text-center p-2 text-slate-400">
+                                            <i class="fa-regular fa-image text-xl mb-1 block"></i>
+                                            <span class="text-[11px]">Belum ada part dipilih</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Foto Kamera Sebelum Cek & Sesudah Cek -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
+                                <label class="block text-xs font-bold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-camera text-blue-600 mr-1"></i> Foto Sebelum Cek (Kamera)
+                                </label>
+                                <div class="flex flex-col sm:flex-row items-center gap-4">
+                                    <div class="w-full sm:w-32 h-28 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                        <img id="previewSebelum" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Sebelum Cek')">
+                                        <span id="placeholderSebelum" class="text-xs text-slate-400 text-center px-2">Belum ada foto</span>
+                                    </div>
+                                    <div class="flex-1 w-full">
+                                        <label class="cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
+                                            <i class="fa-solid fa-camera"></i>
+                                            <span>Ambil Foto Sebelum</span>
+                                            <input type="file" id="inputFotoSebelum" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewSebelum', 'placeholderSebelum', 'sebelum')">
+                                        </label>
+                                        <p class="text-[11px] text-slate-500 mt-1.5">Otomatis membuka kamera belakang pada perangkat mobile.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
+                                <label class="block text-xs font-bold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-camera-rotate text-emerald-600 mr-1"></i> Foto Sesudah Cek (Kamera)
+                                </label>
+                                <div class="flex flex-col sm:flex-row items-center gap-4">
+                                    <div class="w-full sm:w-32 h-28 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                        <img id="previewSesudah" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Sesudah Cek')">
+                                        <span id="placeholderSesudah" class="text-xs text-slate-400 text-center px-2">Belum ada foto</span>
+                                    </div>
+                                    <div class="flex-1 w-full">
+                                        <label class="cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
+                                            <i class="fa-solid fa-camera"></i>
+                                            <span>Ambil Foto Sesudah</span>
+                                            <input type="file" id="inputFotoSesudah" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewSesudah', 'placeholderSesudah', 'sesudah')">
+                                        </label>
+                                        <p class="text-[11px] text-slate-500 mt-1.5">Dokumentasi kondisi part setelah pengecekan selesai.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Abnormality & Nomor EWO -->
+                        <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 sm:p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                                        Apakah ada abnormality? <span class="text-amber-700 font-normal">(Jika Ya tulis nomor EWO)</span> <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="flex gap-3">
+                                        <label class="flex-1 cursor-pointer">
+                                            <input type="radio" name="abnormalityStatus" value="Tidak" checked onchange="toggleEwoField()" class="peer hidden">
+                                            <div class="text-center py-2.5 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 transition">
+                                                <i class="fa-solid fa-check-circle mr-1"></i> Tidak (Normal)
+                                            </div>
+                                        </label>
+                                        <label class="flex-1 cursor-pointer">
+                                            <input type="radio" name="abnormalityStatus" value="Ya" onchange="toggleEwoField()" class="peer hidden">
+                                            <div class="text-center py-2.5 px-4 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-600 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 transition">
+                                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Ya (Abnormal)
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="ewoContainer" class="opacity-50 pointer-events-none transition-opacity">
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                                        Nomor EWO <span id="ewoRequiredStar" class="text-rose-500 hidden">*</span>
+                                    </label>
+                                    <input type="text" id="lapNomorEwo" disabled placeholder="Contoh: EWO-2026-0045"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-500 outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Submit -->
+                        <div class="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-slate-100">
+                            <button type="button" onclick="resetLaporanForm()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-sm font-semibold transition">
+                                Reset Form
+                            </button>
+                            <button type="submit" id="btnSubmitLaporan" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md shadow-blue-600/20 transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Simpan ke Sheet Input Laporan</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabel Data Sheet Input Laporan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Data Sheet Input Laporan</h3>
+                            <p class="text-xs text-slate-500">Rekap hasil inspeksi mesin yang tersimpan di Google Sheets</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, EWO..."
+                                class="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button type="button" onclick="exportLaporanCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                <i class="fa-solid fa-file-excel"></i>
+                                <span>Export CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <th class="py-3.5 px-4 whitespace-nowrap">ID</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">PIC</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Tanggal Input</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Nama Part</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Image (DB)</th>
+                                    <th class="py-3.5 px-4 min-w-[230px]">Standar Cek</th>
+                                    <th class="py-3.5 px-4 min-w-[290px]">Metode Cek</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Abnormality?</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Nomor EWO</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laporanTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 2: SHEET DATABASE                                                    -->
+            <!-- ========================================================================= -->
+            <div id="viewDatabase" class="hidden space-y-6">
+                <div id="dbReadOnlyBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 px-5 py-3.5 rounded-2xl text-xs flex items-center gap-2.5">
+                    <i class="fa-solid fa-lock text-amber-600 text-base"></i>
+                    <span>Anda masuk dengan role <strong id="dbRoleNotice">Operator</strong> (Mode Baca Saja). Perubahan master data hanya diizinkan untuk <strong>Supervisor / Admin</strong>.</span>
+                </div>
+
+                <!-- Form Tambah / Edit Master Database -->
+                <div id="dbFormCard" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-database text-emerald-400"></i>
+                            <h2 id="dbFormTitle" class="font-bold text-base">Tambah Data Master (Sheet Database)</h2>
+                        </div>
+                        <span class="text-xs bg-slate-700 text-slate-200 px-3 py-1 rounded-lg">Akses Khusus Supervisor</span>
+                    </div>
+
+                    <form id="databaseForm" class="p-6 space-y-4">
+                        <input type="hidden" id="dbOriginalId" value="">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">ID Part <span class="text-slate-400 font-normal">(Opsional / Auto)</span></label>
+                                <input type="text" id="dbPartIdInput" placeholder="Contoh: PART-001"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Part <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbNamaPart" required placeholder="Contoh: Motor Conveyor Utama"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Cek <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbMetodeCek" required placeholder="Contoh: Visual & Termometer IR"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Standar Cek <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbStandarCek" required placeholder="Contoh: Suhu < 60°C, Tidak Berisik"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">PIC <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbPic" required placeholder="Contoh: Budi Santoso"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/60 flex flex-col sm:flex-row items-center gap-4">
+                            <div class="w-28 h-24 bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                <img id="previewDbPart" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Preview Foto Part')">
+                                <span id="placeholderDbPart" class="text-[11px] text-slate-400 text-center px-2">Belum ada foto</span>
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Image (Foto Part Referensi)</label>
+                                <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
+                                    <i class="fa-solid fa-upload text-blue-600"></i>
+                                    <span>Pilih / Ambil Foto Part</span>
+                                    <input type="file" id="inputDbFotoPart" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'previewDbPart', 'placeholderDbPart', 'dbPart')">
+                                </label>
+                                <p class="text-[11px] text-slate-500 mt-1">Foto akan diunggah otomatis ke folder Google Drive & disimpan di Sheet Database.</p>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-center">
+                                <button type="button" id="btnCancelDbEdit" onclick="resetDatabaseForm()" class="hidden px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                                    Batal Edit
+                                </button>
+                                <button type="submit" id="btnSubmitDb" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span id="btnSaveDbText">Simpan ke Database</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabel Sheet Database -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Data Sheet Database</h3>
+                            <p class="text-xs text-slate-500">Daftar master part, foto referensi, metode cek, standar cek, dan PIC</p>
+                        </div>
+                        <input type="text" id="searchDatabase" onkeyup="renderDatabaseTable()" placeholder="Cari Part, Metode, PIC..."
+                            class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <th class="py-3 px-4 w-12">No</th>
+                                    <th class="py-3 px-4">ID Part</th>
+                                    <th class="py-3 px-4">Nama Part</th>
+                                    <th class="py-3 px-4 text-center">Image (Foto Part)</th>
+                                    <th class="py-3 px-4">Metode Cek</th>
+                                    <th class="py-3 px-4">Standar Cek</th>
+                                    <th class="py-3 px-4">PIC</th>
+                                    <th class="py-3 px-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="databaseTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. KONFIGURASI ENDPOINT API APPS SCRIPT & STATE KEAMANAN
+        // =========================================================================
+        // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA (/exec)
+        const DEFAULT_GAS_API_URL = "https://script.google.com/macros/s/PASTE_URL_WEB_APP_ANDA_DISINI/exec";
+        const STORAGE_API_KEY = "CHECKLIST_MESIN_GAS_API_URL";
+
+        function getGasApiUrl() {
+            const saved = localStorage.getItem(STORAGE_API_KEY);
+            if (saved && saved.startsWith("https://script.google.com/")) {
+                return saved.trim();
+            }
+            return DEFAULT_GAS_API_URL.trim();
+        }
+
+        function isApiUrlConfigured() {
+            const url = getGasApiUrl();
+            return url.startsWith("https://script.google.com/") && !url.includes("PASTE_URL_WEB_APP");
+        }
+
+        function toggleApiConfigPanel() {
+            const panel = document.getElementById('apiConfigPanel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+            updateApiConfigUI();
+        }
+
+        function updateApiConfigUI() {
+            const inputEl = document.getElementById('gasApiUrlInput');
+            const badgeEl = document.getElementById('apiStatusBadge');
+            const currentUrl = getGasApiUrl();
+            if (inputEl && !currentUrl.includes("PASTE_URL_WEB_APP")) {
+                inputEl.value = currentUrl;
+            }
+            if (badgeEl) {
+                if (isApiUrlConfigured()) {
+                    badgeEl.textContent = "Terhubung";
+                    badgeEl.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+                } else {
+                    badgeEl.textContent = "Belum Diatur";
+                    badgeEl.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
+                }
+            }
+        }
+
+        function saveGasApiUrl() {
+            const inputEl = document.getElementById('gasApiUrlInput');
+            const val = inputEl ? inputEl.value.trim() : "";
+            if (!val.startsWith("https://script.google.com/")) {
+                showLoginError("URL Web App harus diawali https://script.google.com/...");
+                return;
+            }
+            localStorage.setItem(STORAGE_API_KEY, val);
+            safeAddClass('loginError', 'hidden');
+            updateApiConfigUI();
+            safeAddClass('apiConfigPanel', 'hidden');
+            showModal({
+                title: "Endpoint API Tersimpan",
+                message: "URL Google Apps Script berhasil disimpan di browser ini.",
+                type: "success"
+            });
+        }
+
+        let databaseSheet = [];
+        let laporanSheet = [];
+        let tempImages = { dbPart: "", sebelum: "", sesudah: "" };
+        let currentUser = null;
+        let sessionToken = null;
+        let dashCharts = { daily: null, pie: null, topParts: null, pic: null };
+
+        function isSupervisor() {
+            if (!currentUser || !currentUser.role) return false;
+            const r = String(currentUser.role).toLowerCase();
+            return r === "supervisor" || r === "admin";
+        }
+
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+        function safeSetValue(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        }
+        function safeAddClass(id, cls) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add(cls);
+        }
+        function safeRemoveClass(id, cls) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove(cls);
+        }
+
+        // =========================================================================
+        // 2. KOMUNIKASI REST API (FETCH POST KE GOOGLE APPS SCRIPT doPost)
+        // =========================================================================
+        async function callGasApi(action, token = "", payload = {}) {
+            const apiUrl = getGasApiUrl();
+            if (!isApiUrlConfigured()) {
+                safeRemoveClass('apiConfigPanel', 'hidden');
+                throw new Error("URL Web App Apps Script belum diatur. Silakan tempel URL /exec pada pengaturan di atas.");
+            }
+
+            // Gunakan text/plain agar bebas dari CORS OPTIONS preflight di Google Apps Script
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify({
+                    action: action,
+                    token: token,
+                    payload: payload
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error ${response.status}: Gagal menghubungi server Google Apps Script.`);
+            }
+
+            const json = await response.json();
+            if (!json.ok) {
+                const msg = json.error || "Terjadi kesalahan pada server.";
+                if (msg.includes("Sesi") || msg.includes("login")) {
+                    forceSessionExpired(msg);
+                }
+                throw new Error(msg);
+            }
+            return json.data;
+        }
+
+        function forceSessionExpired(msg) {
+            sessionToken = null;
+            currentUser = null;
+            safeAddClass('appSection', 'hidden');
+            safeRemoveClass('loginSection', 'hidden');
+            showLoginError(msg || "Sesi berakhir. Silakan login ulang.");
+        }
+
+        async function loadDataFromServer() {
+            if (!sessionToken) return;
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+
+            try {
+                const data = await callGasApi('getAllAppData', sessionToken, {});
+                if (data) {
+                    databaseSheet = data.database || [];
+                    laporanSheet = data.laporan || [];
+                }
+                syncDropdownsFromDatabase();
+                renderDatabaseTable();
+                renderLaporanTable();
+                populateDashboardPicFilter();
+                renderDashboard();
+                updateBadges();
+                safeSetValue('lapId', generateNextLaporanId());
+            } catch (err) {
+                showModal({
+                    title: "Gagal Memuat Data",
+                    message: err.message || String(err),
+                    type: "danger"
+                });
+            } finally {
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        // =========================================================================
+        // 3. SISTEM LOGIN, RBAC & LOGOUT
+        // =========================================================================
+        function togglePassword() {
+            const input = document.getElementById('loginPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (!input || !icon) return;
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function showLoginError(msg) {
+            safeSetText('loginErrorText', msg);
+            safeRemoveClass('loginError', 'hidden');
+        }
+
+        function applyRolePermissions() {
+            if (isSupervisor()) {
+                safeRemoveClass('dbFormCard', 'hidden');
+                safeAddClass('dbReadOnlyBanner', 'hidden');
+            } else {
+                safeAddClass('dbFormCard', 'hidden');
+                safeRemoveClass('dbReadOnlyBanner', 'hidden');
+                safeSetText('dbRoleNotice', currentUser ? currentUser.role : "Operator");
+            }
+        }
+
+        async function onLoginSuccess(user, token) {
+            currentUser = user;
+            sessionToken = token;
+            safeAddClass('loginError', 'hidden');
+            safeAddClass('loginSection', 'hidden');
+            safeRemoveClass('appSection', 'hidden');
+            safeSetText('currentUserDisplay', `${user.username} (${user.role})`);
+            applyRolePermissions();
+            resetLaporanForm();
+            await loadDataFromServer();
+        }
+
+        function handleLogout() {
+            showModal({
+                title: "Konfirmasi Keluar",
+                message: "Apakah Anda yakin ingin mengakhiri sesi aplikasi?",
+                type: "warning",
+                confirmText: "Ya, Keluar",
+                onConfirm: async () => {
+                    if (sessionToken) {
+                        try {
+                            await callGasApi('logoutSession', sessionToken, {});
+                        } catch (e) {}
+                    }
+                    sessionToken = null;
+                    currentUser = null;
+                    const loginForm = document.getElementById('loginForm');
+                    if (loginForm) loginForm.reset();
+                    safeAddClass('appSection', 'hidden');
+                    safeRemoveClass('loginSection', 'hidden');
+                }
+            });
+        }
+
+        // =========================================================================
+        // 4. NAVIGASI TAB & BADGES
+        // =========================================================================
+        function switchTab(tabName) {
+            const btnDashboard = document.getElementById('tabBtnDashboard');
+            const btnLaporan = document.getElementById('tabBtnLaporan');
+            const btnDatabase = document.getElementById('tabBtnDatabase');
+
+            const activeClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-blue-600 text-white shadow-sm";
+            const inactiveClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-slate-200/70";
+
+            safeAddClass('viewDashboard', 'hidden');
+            safeAddClass('viewLaporan', 'hidden');
+            safeAddClass('viewDatabase', 'hidden');
+
+            if (btnDashboard) btnDashboard.className = inactiveClass;
+            if (btnLaporan) btnLaporan.className = inactiveClass;
+            if (btnDatabase) btnDatabase.className = inactiveClass;
+
+            if (tabName === 'dashboard') {
+                safeRemoveClass('viewDashboard', 'hidden');
+                if (btnDashboard) btnDashboard.className = activeClass;
+                renderDashboard();
+            } else if (tabName === 'laporan') {
+                safeRemoveClass('viewLaporan', 'hidden');
+                if (btnLaporan) btnLaporan.className = activeClass;
+                syncDropdownsFromDatabase();
+            } else {
+                safeRemoveClass('viewDatabase', 'hidden');
+                if (btnDatabase) btnDatabase.className = activeClass;
+            }
+        }
+
+        function updateBadges() {
+            safeSetText('badgeLaporanCount', laporanSheet.length);
+            safeSetText('badgeDbCount', databaseSheet.length);
+        }
+
+        // =========================================================================
+        // 4B. LOGIKA DASHBOARD MONITORING & GRAFIK (CHART.JS)
+        // =========================================================================
+        function populateDashboardPicFilter() {
+            const selectEl = document.getElementById('dashPicFilter');
+            if (!selectEl) return;
+            const currentVal = selectEl.value;
+            const pics = [...new Set([
+                ...databaseSheet.map(d => d.pic),
+                ...laporanSheet.map(l => l.pic)
+            ].filter(Boolean))].sort();
+
+            selectEl.innerHTML = `<option value="ALL">Semua PIC</option>` +
+                pics.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+            if (pics.includes(currentVal)) selectEl.value = currentVal;
+        }
+
+        function parseLaporanDate(rawDate) {
+            if (!rawDate) return null;
+            const cleaned = String(rawDate).trim().replace(' ', 'T');
+            const d = new Date(cleaned);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function getFilteredDashboardData() {
+            const period = document.getElementById('dashPeriodFilter')?.value || 'ALL';
+            const picFilter = document.getElementById('dashPicFilter')?.value || 'ALL';
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            return laporanSheet.filter(item => {
+                if (picFilter !== 'ALL' && item.pic !== picFilter) return false;
+                if (period === 'ALL') return true;
+
+                const d = parseLaporanDate(item.tanggalInput);
+                if (!d) return false;
+
+                if (period === 'TODAY') {
+                    return d >= startOfToday;
+                } else if (period === '7D') {
+                    const cutoff = new Date(startOfToday);
+                    cutoff.setDate(cutoff.getDate() - 6);
+                    return d >= cutoff;
+                } else if (period === '30D') {
+                    const cutoff = new Date(startOfToday);
+                    cutoff.setDate(cutoff.getDate() - 29);
+                    return d >= cutoff;
+                } else if (period === 'MONTH') {
+                    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+                }
+                return true;
+            });
+        }
+
+        function renderDashboard() {
+            const filtered = getFilteredDashboardData();
+            const totalInspeksi = filtered.length;
+            const abnormalItems = filtered.filter(i => String(i.abnormality).toLowerCase() === 'ya');
+            const normalCount = totalInspeksi - abnormalItems.length;
+            const normalRate = totalInspeksi > 0 ? Math.round((normalCount / totalInspeksi) * 100) : 0;
+
+            const totalDbParts = databaseSheet.length;
+            const checkedUniqueParts = new Set(filtered.map(i => i.namaPart).filter(Boolean)).size;
+            const completionRate = totalDbParts > 0 ? Math.min(100, Math.round((checkedUniqueParts / totalDbParts) * 100)) : 0;
+
+            safeSetText('kpiTotalInspeksi', totalInspeksi);
+            safeSetText('kpiSubInspeksi', `${totalInspeksi} checklist tercatat`);
+            safeSetText('kpiCompletionRate', `${completionRate}%`);
+            safeSetText('kpiSubCompletion', `${checkedUniqueParts} dari ${totalDbParts} part database`);
+            safeSetText('kpiNormalRate', `${normalRate}%`);
+            safeSetText('kpiSubNormal', `${normalCount} pengecekan normal`);
+            safeSetText('kpiTotalAbnormal', abnormalItems.length);
+            safeSetText('kpiSubAbnormal', `${abnormalItems.length} temuan EWO aktif`);
+            safeSetText('dashEwoCountBadge', `${abnormalItems.length} EWO`);
+
+            renderDashboardCharts(filtered);
+            renderDashboardAbnormalTable(abnormalItems);
+        }
+
+        function renderDashboardCharts(data) {
+            if (typeof Chart === 'undefined') return;
+
+            const dateMap = {};
+            data.forEach(item => {
+                const dateKey = formatTanggalRingkas(item.tanggalInput).slice(0, 10) || 'Tidak Diketahui';
+                if (!dateMap[dateKey]) dateMap[dateKey] = { normal: 0, abnormal: 0 };
+                if (String(item.abnormality).toLowerCase() === 'ya') {
+                    dateMap[dateKey].abnormal++;
+                } else {
+                    dateMap[dateKey].normal++;
+                }
+            });
+            const sortedDates = Object.keys(dateMap).sort();
+
+            const ctxDaily = document.getElementById('chartDailyTrend');
+            if (ctxDaily) {
+                if (dashCharts.daily) dashCharts.daily.destroy();
+                dashCharts.daily = new Chart(ctxDaily, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedDates,
+                        datasets: [
+                            {
+                                label: 'Normal',
+                                data: sortedDates.map(d => dateMap[d].normal),
+                                backgroundColor: '#10b981',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Abnormality',
+                                data: sortedDates.map(d => dateMap[d].abnormal),
+                                backgroundColor: '#f43f5e',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+                        }
+                    }
+                });
+            }
+
+            const abnormalCount = data.filter(i => String(i.abnormality).toLowerCase() === 'ya').length;
+            const normalCount = data.length - abnormalCount;
+            const ctxPie = document.getElementById('chartStatusPie');
+            if (ctxPie) {
+                if (dashCharts.pie) dashCharts.pie.destroy();
+                dashCharts.pie = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Normal (Tidak)', 'Abnormality (Ya)'],
+                        datasets: [{
+                            data: [normalCount, abnormalCount],
+                            backgroundColor: ['#10b981', '#f43f5e'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            const partAbnMap = {};
+            data.filter(i => String(i.abnormality).toLowerCase() === 'ya').forEach(i => {
+                partAbnMap[i.namaPart] = (partAbnMap[i.namaPart] || 0) + 1;
+            });
+            const topParts = Object.entries(partAbnMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+            const ctxTopParts = document.getElementById('chartTopAbnormalParts');
+            if (ctxTopParts) {
+                if (dashCharts.topParts) dashCharts.topParts.destroy();
+                dashCharts.topParts = new Chart(ctxTopParts, {
+                    type: 'bar',
+                    data: {
+                        labels: topParts.length ? topParts.map(p => p[0]) : ['Tidak ada abnormality'],
+                        datasets: [{
+                            label: 'Jumlah Abnormality',
+                            data: topParts.length ? topParts.map(p => p[1]) : [0],
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+
+            const picMap = {};
+            data.forEach(i => {
+                const p = i.pic || 'Tanpa PIC';
+                picMap[p] = (picMap[p] || 0) + 1;
+            });
+            const sortedPics = Object.entries(picMap).sort((a, b) => b[1] - a[1]);
+
+            const ctxPic = document.getElementById('chartPicPerformance');
+            if (ctxPic) {
+                if (dashCharts.pic) dashCharts.pic.destroy();
+                dashCharts.pic = new Chart(ctxPic, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedPics.map(p => p[0]),
+                        datasets: [{
+                            label: 'Total Pengecekan',
+                            data: sortedPics.map(p => p[1]),
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+        }
+
+        function renderDashboardAbnormalTable(abnormalItems) {
+            const tbody = document.getElementById('dashAbnormalTableBody');
+            if (!tbody) return;
+
+            if (abnormalItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">Tidak ada temuan abnormality pada periode ini. Semua kondisi normal!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = abnormalItems.map(item => `
+                <tr class="hover:bg-rose-50/40 transition align-top">
+                    <td class="py-3 px-4 font-mono font-bold text-rose-600 whitespace-nowrap">${escapeHtml(item.nomorEwo || '-')}</td>
+                    <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formatTanggalRingkas(item.tanggalInput))}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
+                    <td class="py-3 px-4 text-slate-700 whitespace-nowrap">${escapeHtml(item.pic)}</td>
+                    <td class="py-3 px-4 text-slate-600 min-w-[220px] leading-relaxed">${escapeHtml(item.standarCek || '-')}</td>
+                    <td class="py-3 px-4 text-center">
+                        ${item.fotoSebelum
+                            ? `<img src="${resolveDriveImageUrl(item.fotoSebelum)}" onclick="openImagePreview(this.src, 'Foto Sebelum (${escapeHtml(item.nomorEwo)})')"
+                                loading="lazy" referrerpolicy="no-referrer"
+                                onerror="handleImgFallback(this, '${escapeHtml(item.fotoSebelum)}')"
+                                class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                            : `<span class="text-slate-400">-</span>`}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        ${item.fotoSesudah
+                            ? `<img src="${resolveDriveImageUrl(item.fotoSesudah)}" onclick="openImagePreview(this.src, 'Foto Sesudah (${escapeHtml(item.nomorEwo)})')"
+                                loading="lazy" referrerpolicy="no-referrer"
+                                onerror="handleImgFallback(this, '${escapeHtml(item.fotoSesudah)}')"
+                                class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                            : `<span class="text-slate-400">-</span>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // =========================================================================
+        // 5. LOGIKA KOMPRESI & UPLOAD GAMBAR HD
+        // =========================================================================
+        function handleImageUpload(inputElement, previewImgId, placeholderId, targetKey) {
+            const file = inputElement.files && inputElement.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showModal({
+                    title: "File Tidak Valid",
+                    message: "Hanya file gambar (JPG/PNG) yang diperbolehkan.",
+                    type: "warning"
+                });
+                inputElement.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1600;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.90);
+                    tempImages[targetKey] = compressedDataUrl;
+
+                    const previewEl = document.getElementById(previewImgId);
+                    if (previewEl) {
+                        previewEl.src = compressedDataUrl;
+                        previewEl.classList.remove('hidden');
+                    }
+                    safeAddClass(placeholderId, 'hidden');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // =========================================================================
+        // 6. LOGIKA SHEET DATABASE
+        // =========================================================================
+        function editDatabaseItem(id) {
+            if (!isSupervisor()) return;
+            const item = databaseSheet.find(d => d.id === id);
+            if (!item) return;
+
+            safeSetValue('dbOriginalId', item.id);
+            safeSetValue('dbPartIdInput', item.id);
+            safeSetValue('dbNamaPart', item.namaPart);
+            safeSetValue('dbMetodeCek', item.metodeCek);
+            safeSetValue('dbStandarCek', item.standarCek);
+            safeSetValue('dbPic', item.pic);
+
+            tempImages.dbPart = item.image;
+            const previewEl = document.getElementById('previewDbPart');
+            if (previewEl && item.image) {
+                previewEl.src = resolveDriveImageUrl(item.image);
+                previewEl.classList.remove('hidden');
+                safeAddClass('placeholderDbPart', 'hidden');
+            }
+
+            safeSetText('dbFormTitle', `Edit Data Part (${item.id} - ${item.namaPart})`);
+            safeSetText('btnSaveDbText', "Update Database");
+            safeRemoveClass('btnCancelDbEdit', 'hidden');
+
+            const dbForm = document.getElementById('databaseForm');
+            if (dbForm) dbForm.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function deleteDatabaseItem(id) {
+            if (!isSupervisor()) return;
+            const item = databaseSheet.find(d => d.id === id);
+            if (!item) return;
+
+            showModal({
+                title: "Hapus Data Database?",
+                message: `Anda yakin ingin menghapus part "${item.namaPart}" dari Sheet Database?`,
+                type: "danger",
+                confirmText: "Ya, Hapus",
+                onConfirm: async () => {
+                    try {
+                        await callGasApi('deleteDatabaseRecord', sessionToken, { id: id });
+                        await loadDataFromServer();
+                    } catch (err) {
+                        showModal({ title: "Gagal Menghapus", message: err.message || String(err), type: "danger" });
+                    }
+                }
+            });
+        }
+
+        function resetDatabaseForm() {
+            const dbForm = document.getElementById('databaseForm');
+            if (dbForm) dbForm.reset();
+
+            safeSetValue('dbOriginalId', "");
+            safeSetValue('dbPartIdInput', "");
+            tempImages.dbPart = "";
+
+            const previewEl = document.getElementById('previewDbPart');
+            if (previewEl) {
+                previewEl.src = "";
+                previewEl.classList.add('hidden');
+            }
+            safeRemoveClass('placeholderDbPart', 'hidden');
+
+            safeSetText('dbFormTitle', "Tambah Data Master (Sheet Database)");
+            safeSetText('btnSaveDbText', "Simpan ke Database");
+            safeAddClass('btnCancelDbEdit', 'hidden');
+        }
+
+        function renderDatabaseTable() {
+            const tbody = document.getElementById('databaseTableBody');
+            if (!tbody) return;
+
+            const searchEl = document.getElementById('searchDatabase');
+            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+            const canEdit = isSupervisor();
+
+            const filtered = databaseSheet.filter(item =>
+                String(item.id).toLowerCase().includes(keyword) ||
+                String(item.namaPart).toLowerCase().includes(keyword) ||
+                String(item.metodeCek).toLowerCase().includes(keyword) ||
+                String(item.standarCek).toLowerCase().includes(keyword) ||
+                String(item.pic).toLowerCase().includes(keyword)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Belum ada data di Sheet Database.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((item, idx) => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-4 font-semibold text-slate-500">${idx + 1}</td>
+                    <td class="py-3 px-4 font-mono font-semibold text-blue-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(item.namaPart)}</td>
+                    <td class="py-3 px-4 text-center">
+                        ${item.image
+                            ? `<img src="${resolveDriveImageUrl(item.image)}" alt="${escapeHtml(item.namaPart)}" 
+                                loading="lazy" referrerpolicy="no-referrer"
+                                onerror="handleImgFallback(this, '${escapeHtml(item.image)}')"
+                                onclick="openImagePreview(this.src, '${escapeHtml(item.namaPart)}')"
+                                class="w-14 h-12 object-cover rounded-lg border border-slate-200 mx-auto cursor-pointer hover:scale-105 transition">`
+                            : `<span class="text-slate-400">-</span>`}
+                    </td>
+                    <td class="py-3 px-4 text-slate-700">${escapeHtml(item.metodeCek)}</td>
+                    <td class="py-3 px-4 text-slate-700">${escapeHtml(item.standarCek)}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg font-medium">
+                            <i class="fa-solid fa-user text-[10px]"></i> ${escapeHtml(item.pic)}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        ${canEdit ? `
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button type="button" onclick="editDatabaseItem('${item.id}')" title="Edit" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button type="button" onclick="deleteDatabaseItem('${item.id}')" title="Hapus" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        ` : `<span class="text-[11px] text-slate-400 italic">Read-only</span>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // =========================================================================
+        // 7. LOGIKA SHEET INPUT LAPORAN
+        // =========================================================================
+        function syncDropdownsFromDatabase() {
+            const picSelect = document.getElementById('lapPic');
+            const partSelect = document.getElementById('lapNamaPart');
+            if (!picSelect || !partSelect) return;
+
+            const currentPicVal = picSelect.value;
+            const currentPartVal = partSelect.value;
+
+            const uniquePics = [...new Set(databaseSheet.map(item => item.pic).filter(Boolean))];
+            picSelect.innerHTML = `<option value="">-- Pilih PIC (Dari Database) --</option>` + 
+                uniquePics.map(pic => `<option value="${escapeHtml(pic)}">${escapeHtml(pic)}</option>`).join('');
+
+            partSelect.innerHTML = `<option value="">-- Pilih Nama Part --</option>` + 
+                databaseSheet.map(item => `<option value="${item.id}">${escapeHtml(item.namaPart)}</option>`).join('');
+
+            if (uniquePics.includes(currentPicVal)) picSelect.value = currentPicVal;
+            if (databaseSheet.some(d => d.id === currentPartVal)) {
+                partSelect.value = currentPartVal;
+                onPartSelected();
+            }
+        }
+
+        function onPartSelected() {
+            const partSelect = document.getElementById('lapNamaPart');
+            if (!partSelect) return;
+
+            const selectedId = partSelect.value;
+            const partData = databaseSheet.find(item => item.id === selectedId);
+            const imgPreview = document.getElementById('lapDbImagePreview');
+
+            if (partData) {
+                safeSetValue('lapStandarCek', partData.standarCek);
+                safeSetValue('lapMetodeCek', partData.metodeCek);
+                if (imgPreview && partData.image) {
+                    const resolvedUrl = resolveDriveImageUrl(partData.image);
+                    imgPreview.onerror = () => handleImgFallback(imgPreview, partData.image);
+                    imgPreview.src = resolvedUrl;
+                    imgPreview.classList.remove('hidden');
+                    safeAddClass('lapDbImagePlaceholder', 'hidden');
+                } else {
+                    if (imgPreview) {
+                        imgPreview.src = "";
+                        imgPreview.classList.add('hidden');
+                    }
+                    safeRemoveClass('lapDbImagePlaceholder', 'hidden');
+                }
+
+                const picSelect = document.getElementById('lapPic');
+                if (picSelect && !picSelect.value && partData.pic) {
+                    picSelect.value = partData.pic;
+                }
+            } else {
+                safeSetValue('lapStandarCek', "");
+                safeSetValue('lapMetodeCek', "");
+                if (imgPreview) {
+                    imgPreview.src = "";
+                    imgPreview.classList.add('hidden');
+                }
+                safeRemoveClass('lapDbImagePlaceholder', 'hidden');
+            }
+        }
+
+        function toggleEwoField() {
+            const statusEl = document.querySelector('input[name="abnormalityStatus"]:checked');
+            const status = statusEl ? statusEl.value : "Tidak";
+            const ewoContainer = document.getElementById('ewoContainer');
+            const ewoInput = document.getElementById('lapNomorEwo');
+
+            if (status === "Ya") {
+                if (ewoContainer) ewoContainer.classList.remove('opacity-50', 'pointer-events-none');
+                if (ewoInput) {
+                    ewoInput.disabled = false;
+                    ewoInput.required = true;
+                    ewoInput.focus();
+                }
+                safeRemoveClass('ewoRequiredStar', 'hidden');
+            } else {
+                if (ewoContainer) ewoContainer.classList.add('opacity-50', 'pointer-events-none');
+                if (ewoInput) {
+                    ewoInput.disabled = true;
+                    ewoInput.required = false;
+                    ewoInput.value = "";
+                }
+                safeAddClass('ewoRequiredStar', 'hidden');
+            }
+        }
+
+        function generateNextLaporanId() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const seq = String(laporanSheet.length + 1).padStart(3, '0');
+            return `LAP-${yyyy}${mm}${dd}-${seq}`;
+        }
+
+        function setCurrentDateTimeLocal() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            safeSetValue('lapTanggal', now.toISOString().slice(0, 16));
+        }
+
+        function resetLaporanForm() {
+            const lapForm = document.getElementById('laporanForm');
+            if (lapForm) lapForm.reset();
+
+            safeSetValue('lapId', generateNextLaporanId());
+            setCurrentDateTimeLocal();
+
+            safeSetValue('lapStandarCek', "");
+            safeSetValue('lapMetodeCek', "");
+            safeAddClass('lapDbImagePreview', 'hidden');
+            safeRemoveClass('lapDbImagePlaceholder', 'hidden');
+
+            tempImages.sebelum = "";
+            tempImages.sesudah = "";
+            safeAddClass('previewSebelum', 'hidden');
+            safeRemoveClass('placeholderSebelum', 'hidden');
+            safeAddClass('previewSesudah', 'hidden');
+            safeRemoveClass('placeholderSesudah', 'hidden');
+
+            toggleEwoField();
+        }
+
+        function deleteLaporanItem(id) {
+            if (!isSupervisor()) return;
+            showModal({
+                title: "Hapus Data Laporan?",
+                message: `Anda yakin ingin menghapus laporan dengan ID ${id}?`,
+                type: "danger",
+                confirmText: "Ya, Hapus",
+                onConfirm: async () => {
+                    try {
+                        await callGasApi('deleteLaporanRecord', sessionToken, { id: id });
+                        await loadDataFromServer();
+                    } catch (err) {
+                        showModal({
+                            title: "Gagal Menghapus",
+                            message: err.message || String(err),
+                            type: "danger"
+                        });
+                    }
+                }
+            });
+        }
+
+        function formatTanggalRingkas(val) {
+            if (!val) return "-";
+            const str = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(str)) {
+                return str.replace('T', ' ').slice(0, 16);
+            }
+            const d = new Date(str);
+            if (isNaN(d.getTime())) return str;
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+
+        function renderLaporanTable() {
+            const tbody = document.getElementById('laporanTableBody');
+            if (!tbody) return;
+
+            const searchEl = document.getElementById('searchLaporan');
+            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+            const canDelete = isSupervisor();
+
+            const filtered = laporanSheet.filter(item =>
+                String(item.id).toLowerCase().includes(keyword) ||
+                String(item.pic).toLowerCase().includes(keyword) ||
+                String(item.namaPart).toLowerCase().includes(keyword) ||
+                String(item.nomorEwo).toLowerCase().includes(keyword)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="py-8 text-center text-slate-400">Belum ada data laporan yang tersimpan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const formattedDate = formatTanggalRingkas(item.tanggalInput);
+                const isAbnormal = item.abnormality === "Ya";
+                return `
+                    <tr class="hover:bg-slate-50 transition align-top">
+                        <td class="py-3.5 px-4 font-mono font-bold text-blue-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
+                        <td class="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">${escapeHtml(item.pic)}</td>
+                        <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formattedDate)}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
+                        <td class="py-3.5 px-4 text-center">
+                            ${item.imageDb
+                                ? `<img src="${resolveDriveImageUrl(item.imageDb)}" onclick="openImagePreview(this.src, 'Referensi DB: ${escapeHtml(item.namaPart)}')"
+                                    loading="lazy" referrerpolicy="no-referrer"
+                                    onerror="handleImgFallback(this, '${escapeHtml(item.imageDb)}')"
+                                    class="w-12 h-10 object-cover rounded-lg border border-slate-200 mx-auto cursor-pointer hover:scale-105 transition">`
+                                : `<span class="text-slate-400">-</span>`}
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-700 min-w-[230px] leading-relaxed whitespace-normal break-words">
+                            ${escapeHtml(item.standarCek || '-')}
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-700 min-w-[290px] leading-relaxed whitespace-normal break-words">
+                            ${escapeHtml(item.metodeCek || '-')}
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            ${item.fotoSebelum
+                                ? `<img src="${resolveDriveImageUrl(item.fotoSebelum)}" onclick="openImagePreview(this.src, 'Foto Sebelum Cek (${escapeHtml(item.id)})')"
+                                    loading="lazy" referrerpolicy="no-referrer"
+                                    onerror="handleImgFallback(this, '${escapeHtml(item.fotoSebelum)}')"
+                                    class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                                : `<span class="text-slate-400">-</span>`}
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            ${item.fotoSesudah
+                                ? `<img src="${resolveDriveImageUrl(item.fotoSesudah)}" onclick="openImagePreview(this.src, 'Foto Sesudah Cek (${escapeHtml(item.id)})')"
+                                    loading="lazy" referrerpolicy="no-referrer"
+                                    onerror="handleImgFallback(this, '${escapeHtml(item.fotoSesudah)}')"
+                                    class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                                : `<span class="text-slate-400">-</span>`}
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            ${isAbnormal 
+                                ? `<span class="inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-triangle-exclamation"></i> Ya</span>`
+                                : `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-check"></i> Tidak</span>`
+                            }
+                        </td>
+                        <td class="py-3.5 px-4 font-mono font-semibold whitespace-nowrap ${isAbnormal ? 'text-rose-600' : 'text-slate-400'}">
+                            ${escapeHtml(item.nomorEwo)}
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            ${canDelete ? `
+                                <button type="button" onclick="deleteLaporanItem('${item.id}')" title="Hapus Laporan" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            ` : `<span class="text-[11px] text-slate-400 italic">-</span>`}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 8. EXPORT CSV
+        // =========================================================================
+        function exportLaporanCSV() {
+            if (laporanSheet.length === 0) {
+                showModal({
+                    title: "Data Kosong",
+                    message: "Tidak ada data laporan untuk diekspor.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            const headers = [
+                "ID", "PIC", "Tanggal Input", "Nama Part", 
+                "Standar Cek", "Metode Cek", "Apakah ada abnormality?", "Nomor EWO", "Diinput Oleh"
+            ];
+
+            const rows = laporanSheet.map(item => [
+                item.id,
+                item.pic,
+                String(item.tanggalInput).replace('T', ' '),
+                item.namaPart,
+                item.standarCek,
+                item.metodeCek,
+                item.abnormality,
+                item.nomorEwo,
+                item.createdBy || "-"
+            ]);
+
+            let csvContent = "data:text/csv;charset=utf-8," 
+                + headers.join(",") + "\n"
+                + rows.map(r => r.map(field => `"${String(field).replace(/"/g, '""')}"`).join(",")).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Laporan_Checklist_Mesin_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // =========================================================================
+        // 9. MODAL KUSTOM & HELPER
+        // =========================================================================
+        function showModal({ title, message, type = "info", confirmText = "OK", onConfirm = null }) {
+            const modal = document.getElementById('customModal');
+            const iconEl = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const actionsEl = document.getElementById('modalActions');
+
+            if (!modal) {
+                alert(`${title}: ${message}`);
+                return;
+            }
+
+            if (titleEl) titleEl.textContent = title;
+            if (msgEl) msgEl.textContent = message;
+
+            if (iconEl) {
+                if (type === "success") {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-100 text-emerald-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if (type === "danger") {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-rose-100 text-rose-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                } else if (type === "warning") {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-amber-100 text-amber-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+                } else {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-blue-100 text-blue-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+                }
+            }
+
+            if (actionsEl) {
+                actionsEl.innerHTML = "";
+                if (onConfirm) {
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = "button";
+                    cancelBtn.className = "px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition";
+                    cancelBtn.textContent = "Batal";
+                    cancelBtn.onclick = closeModal;
+                    actionsEl.appendChild(cancelBtn);
+                }
+
+                const okBtn = document.createElement('button');
+                okBtn.type = "button";
+                okBtn.className = `px-4 py-2 rounded-xl text-white text-xs font-semibold transition ${
+                    type === 'danger' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-blue-600 hover:bg-blue-700'
+                }`;
+                okBtn.textContent = confirmText;
+                okBtn.onclick = () => {
+                    closeModal();
+                    if (onConfirm) onConfirm();
+                };
+                actionsEl.appendChild(okBtn);
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            safeAddClass('customModal', 'hidden');
+        }
+
+        function openImagePreview(src, caption) {
+            if (!src) return;
+            const imgEl = document.getElementById('previewModalImg');
+            if (imgEl) {
+                imgEl.onerror = () => handleImgFallback(imgEl, src);
+                imgEl.src = resolveDriveImageUrl(src);
+            }
+            safeSetText('previewModalCaption', caption || "");
+            safeRemoveClass('imagePreviewModal', 'hidden');
+        }
+
+        function closeImagePreview() {
+            safeAddClass('imagePreviewModal', 'hidden');
+        }
+
+        function extractDriveFileId(url) {
+            if (!url) return null;
+            const str = String(url);
+            if (str.startsWith("data:image")) return null;
+            const match = str.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || str.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+            return match ? match[1] : null;
+        }
+
+        function resolveDriveImageUrl(url) {
+            if (!url) return "";
+            const fileId = extractDriveFileId(url);
+            return fileId ? `https://lh3.googleusercontent.com/d/${fileId}=w800` : url;
+        }
+
+        function handleImgFallback(imgEl, originalUrl) {
+            const step = Number(imgEl.dataset.fallbackStep || 0);
+            const fileId = extractDriveFileId(originalUrl);
+
+            if (fileId && step === 0) {
+                imgEl.dataset.fallbackStep = "1";
+                setTimeout(() => {
+                    imgEl.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+                }, 400 + Math.floor(Math.random() * 600));
+            } else if (fileId && step === 1) {
+                imgEl.dataset.fallbackStep = "2";
+                setTimeout(() => {
+                    imgEl.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
+                }, 800 + Math.floor(Math.random() * 800));
+            } else {
+                imgEl.style.display = "none";
+                const span = document.createElement("span");
+                span.className = "inline-flex items-center justify-center w-12 h-10 rounded-lg bg-slate-100 border border-slate-200 text-slate-400 text-[10px]";
+                span.title = "Foto tidak dapat diakses (pastikan izin file Drive: Anyone with the link)";
+                span.innerHTML = '<i class="fa-regular fa-image"></i>';
+                if (imgEl.parentNode) imgEl.parentNode.appendChild(span);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // =========================================================================
+        // 10. INISIALISASI EVENT LISTENER FORM SAAT DOM SIAP
+        // =========================================================================
+        function initAllEventListeners() {
+            updateApiConfigUI();
+            if (!isApiUrlConfigured()) {
+                safeRemoveClass('apiConfigPanel', 'hidden');
+            }
+
+            // 1. Form Login
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const userEl = document.getElementById('loginUsername');
+                    const passEl = document.getElementById('loginPassword');
+                    const usernameInput = userEl ? userEl.value.trim() : "";
+                    const passwordInput = passEl ? passEl.value.trim() : "";
+                    const submitBtn = document.getElementById('btnLoginSubmit');
+                    const originalBtnHtml = submitBtn ? submitBtn.innerHTML : "Masuk";
+
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Memverifikasi...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('verifyLogin', "", {
+                            username: usernameInput,
+                            password: passwordInput
+                        });
+                        if (res && res.success && res.token) {
+                            await onLoginSuccess(res.user, res.token);
+                        } else {
+                            showLoginError((res && res.message) || "Nama pengguna atau password salah!");
+                        }
+                    } catch (err) {
+                        showLoginError(err.message || String(err));
+                    } finally {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnHtml;
+                        }
+                    }
+                });
+            }
+
+            // 2. Form Database (Khusus Supervisor/Admin)
+            const databaseForm = document.getElementById('databaseForm');
+            if (databaseForm) {
+                databaseForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!isSupervisor()) return;
+
+                    const originalId = document.getElementById('dbOriginalId')?.value.trim() || "";
+                    const customPartId = document.getElementById('dbPartIdInput')?.value.trim() || "";
+                    const namaPart = document.getElementById('dbNamaPart')?.value.trim() || "";
+                    const metodeCek = document.getElementById('dbMetodeCek')?.value.trim() || "";
+                    const standarCek = document.getElementById('dbStandarCek')?.value.trim() || "";
+                    const pic = document.getElementById('dbPic')?.value.trim() || "";
+
+                    const btnSubmit = document.getElementById('btnSubmitDb');
+                    const originalHtml = btnSubmit ? btnSubmit.innerHTML : "Simpan ke Database";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('saveDatabaseRecord', sessionToken, {
+                            originalId,
+                            id: customPartId,
+                            namaPart,
+                            image: tempImages.dbPart || "",
+                            metodeCek,
+                            standarCek,
+                            pic
+                        });
+                        await loadDataFromServer();
+                        resetDatabaseForm();
+                        showModal({
+                            title: "Berhasil",
+                            message: (res && res.message) || "Data berhasil disimpan ke Sheet Database.",
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Menyimpan", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalHtml;
+                        }
+                    }
+                });
+            }
+
+            // 3. Form Input Laporan
+            const laporanForm = document.getElementById('laporanForm');
+            if (laporanForm) {
+                laporanForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const id = document.getElementById('lapId')?.value || generateNextLaporanId();
+                    const pic = document.getElementById('lapPic')?.value || "";
+                    const tanggalInput = document.getElementById('lapTanggal')?.value || "";
+                    const partId = document.getElementById('lapNamaPart')?.value || "";
+                    const partData = databaseSheet.find(item => item.id === partId);
+
+                    if (!partData) {
+                        showModal({ title: "Pilih Nama Part", message: "Silakan pilih Nama Part terlebih dahulu.", type: "warning" });
+                        return;
+                    }
+
+                    const statusEl = document.querySelector('input[name="abnormalityStatus"]:checked');
+                    const abnormality = statusEl ? statusEl.value : "Tidak";
+                    const ewoInput = document.getElementById('lapNomorEwo');
+                    const nomorEwo = abnormality === "Ya" ? (ewoInput ? ewoInput.value.trim() : "") : "-";
+
+                    if (abnormality === "Ya" && !nomorEwo) {
+                        showModal({ title: "Nomor EWO Wajib Diisi", message: "Karena Abnormality = Ya, silakan isi Nomor EWO.", type: "danger" });
+                        return;
+                    }
+
+                    const btnSubmit = document.getElementById('btnSubmitLaporan');
+                    const originalHtml = btnSubmit ? btnSubmit.innerHTML : "Simpan ke Sheet Input Laporan";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan Laporan...</span>`;
+                    }
+
+                    const payload = {
+                        id,
+                        pic,
+                        tanggalInput,
+                        namaPart: partData.namaPart,
+                        imageDb: partData.image,
+                        standarCek: partData.standarCek,
+                        metodeCek: partData.metodeCek,
+                        fotoSebelum: tempImages.sebelum || "",
+                        fotoSesudah: tempImages.sesudah || "",
+                        abnormality,
+                        nomorEwo
+                    };
+
+                    try {
+                        const res = await callGasApi('saveLaporanRecord', sessionToken, payload);
+                        await loadDataFromServer();
+                        resetLaporanForm();
+                        showModal({
+                            title: "Laporan Tersimpan",
+                            message: (res && res.message) || "Laporan berhasil tersimpan ke Google Sheets.",
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Menyimpan Laporan", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalHtml;
+                        }
+                    }
+                });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAllEventListeners);
+        } else {
+            initAllEventListeners();
+        }
+    </script>
+</body>
+</html>
