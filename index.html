@@ -72,19 +72,15 @@
                     <i class="fa-solid fa-gear text-sm"></i>
                 </button>
                 <div class="inline-flex items-center justify-center mx-auto mb-3">
-                    <!-- Logo DAM - PT. Daya Anugrah Mulya (Transparan menyatu dengan header) -->
+                    <!-- Logo DAM - PT. Daya Anugrah Mulya -->
                     <svg viewBox="0 0 320 92" class="h-12 w-auto drop-shadow-sm" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DAM PT. Daya Anugrah Mulya">
-                        <!-- Emblem Kotak Melengkung Biru Cerah & Abu-abu Terang -->
                         <path d="M18 14 C34 8, 66 8, 82 14 L82 22 C66 17, 34 17, 18 22 Z" fill="#cbd5e1"/>
                         <path d="M18 78 C34 84, 66 84, 82 78 L82 70 C66 75, 34 75, 18 70 Z" fill="#cbd5e1"/>
                         <path d="M16 20 C34 15, 66 15, 84 20 C88 36, 88 56, 84 72 C66 77, 34 77, 16 72 C12 56, 12 36, 16 20 Z" fill="#38bdf8"/>
-                        <!-- Simbol W Putih di Tengah -->
                         <path d="M32 33 H41 V56 C41 59, 39 60, 36.5 60 C34 60, 32 58, 32 54 Z" fill="#ffffff"/>
                         <path d="M45.5 33 H54.5 V60 H45.5 Z" fill="#ffffff"/>
                         <path d="M59 33 H68 V54 C68 58, 66 60, 63.5 60 C61 60, 59 59, 59 56 Z" fill="#ffffff"/>
-                        <!-- Garis Pemisah Vertikal -->
                         <line x1="104" y1="12" x2="104" y2="80" stroke="rgba(255,255,255,0.45)" stroke-width="1.8"/>
-                        <!-- Teks DAM & PT. Daya Anugrah Mulya -->
                         <text x="120" y="52" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="700" letter-spacing="2" fill="#ffffff">DAM</text>
                         <text x="121" y="73" font-family="Inter, Arial, sans-serif" font-size="14.5" font-weight="400" fill="#e0f2fe">PT. Daya Anugrah Mulya</text>
                     </svg>
@@ -550,14 +546,17 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, EWO..."
                                 class="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none">
-                            <button type="button" onclick="exportLaporanExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
-                                <i class="fa-solid fa-file-excel"></i>
-                                <span>Export Excel</span>
-                            </button>
-                            <button type="button" onclick="exportLaporanPDF()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
-                                <i class="fa-solid fa-file-pdf"></i>
-                                <span>Export PDF</span>
-                            </button>
+                            <!-- Tombol Export (Hanya tampil untuk Supervisor / Admin) -->
+                            <div id="laporanExportGroup" class="hidden flex items-center gap-2">
+                                <button type="button" id="btnExportExcel" onclick="exportLaporanExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Export Excel</span>
+                                </button>
+                                <button type="button" id="btnExportPdf" onclick="exportLaporanPDF()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>Export PDF</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -576,7 +575,7 @@
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
                                     <th class="py-3.5 px-4 text-center whitespace-nowrap">Abnormality?</th>
                                     <th class="py-3.5 px-4 whitespace-nowrap">Nomor EWO</th>
-                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Aksi</th>
+                                    <th id="thLaporanAksi" class="py-3.5 px-4 text-center whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="laporanTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
@@ -591,11 +590,11 @@
             <div id="viewDatabase" class="hidden space-y-6">
                 <div id="dbReadOnlyBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 px-5 py-3.5 rounded-2xl text-xs flex items-center gap-2.5">
                     <i class="fa-solid fa-lock text-amber-600 text-base"></i>
-                    <span>Anda masuk dengan role <strong id="dbRoleNotice">Operator</strong> (Mode Baca Saja). Perubahan master data hanya diizinkan untuk <strong>Supervisor / Admin</strong>.</span>
+                    <span>Anda masuk dengan role <strong id="dbRoleNotice">User</strong> (Mode Baca Saja). User hanya dapat melakukan input laporan dan tidak diizinkan mengubah/menghapus database maupun mengekspor data.</span>
                 </div>
 
-                <!-- Form Tambah / Edit Master Database -->
-                <div id="dbFormCard" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <!-- Form Tambah / Edit Master Database (Hanya Supervisor / Admin) -->
+                <div id="dbFormCard" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-2.5">
                             <i class="fa-solid fa-database text-emerald-400"></i>
@@ -688,7 +687,7 @@
                                     <th class="py-3 px-4">Metode Cek</th>
                                     <th class="py-3 px-4">Standar Cek</th>
                                     <th class="py-3 px-4">PIC</th>
-                                    <th class="py-3 px-4 text-center">Aksi</th>
+                                    <th id="thDatabaseAksi" class="py-3 px-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="databaseTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
@@ -702,253 +701,6 @@
     </div>
 
     <script>
-        // =========================================================================
-        // 8. EXPORT EXCEL (.XLSX) & EXPORT PDF SIAP PAKAI
-        // =========================================================================
-        function getFilteredLaporanForExport() {
-            const searchEl = document.getElementById('searchLaporan');
-            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
-            return laporanSheet.filter(item =>
-                String(item.id).toLowerCase().includes(keyword) ||
-                String(item.pic).toLowerCase().includes(keyword) ||
-                String(item.namaPart).toLowerCase().includes(keyword) ||
-                String(item.nomorEwo).toLowerCase().includes(keyword)
-            );
-        }
-
-        function exportLaporanExcel() {
-            const dataToExport = getFilteredLaporanForExport();
-            if (dataToExport.length === 0) {
-                showModal({
-                    title: "Data Kosong",
-                    message: "Tidak ada data laporan untuk diekspor ke Excel.",
-                    type: "warning"
-                });
-                return;
-            }
-
-            if (typeof XLSX === 'undefined') {
-                showModal({
-                    title: "Library Belum Siap",
-                    message: "Pustaka Excel sedang dimuat. Silakan coba beberapa detik lagi.",
-                    type: "warning"
-                });
-                return;
-            }
-
-            const todayStr = new Date().toLocaleDateString('id-ID', {
-                day: '2-digit', month: 'long', year: 'numeric'
-            });
-            const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
-            const normalCount = dataToExport.length - abnormalCount;
-
-            // Susun struktur sheet rapi siap cetak (Judul Kop, Ringkasan, Header Tabel, Data)
-            const wsData = [
-                ["PT. DAYA ANUGRAH MULYA - LAPORAN CHECKLIST & INSPEKSI MESIN"],
-                [`Tanggal Cetak: ${todayStr} | Dicetak Oleh: ${currentUser ? currentUser.username : '-'} | Total Data: ${dataToExport.length} (Normal: ${normalCount}, Abnormality: ${abnormalCount})`],
-                [],
-                [
-                    "No",
-                    "ID Laporan",
-                    "PIC",
-                    "Tanggal Input",
-                    "Nama Part",
-                    "Standar Cek",
-                    "Metode Cek",
-                    "Status Abnormality",
-                    "Nomor EWO",
-                    "Diinput Oleh"
-                ]
-            ];
-
-            dataToExport.forEach((item, index) => {
-                wsData.push([
-                    index + 1,
-                    item.id || "-",
-                    item.pic || "-",
-                    formatTanggalRingkas(item.tanggalInput),
-                    item.namaPart || "-",
-                    item.standarCek || "-",
-                    item.metodeCek || "-",
-                    item.abnormality === "Ya" ? "Ya (Abnormality)" : "Tidak (Normal)",
-                    item.nomorEwo || "-",
-                    item.createdBy || "-"
-                ]);
-            });
-
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-            // Merge baris judul dan subjudul agar rapi
-            ws["!merges"] = [
-                { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
-                { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } }
-            ];
-
-            // Atur lebar kolom otomatis agar tidak terpotong (###) saat dibuka di Excel
-            ws["!cols"] = [
-                { wch: 5 },   // No
-                { wch: 20 },  // ID Laporan
-                { wch: 18 },  // PIC
-                { wch: 18 },  // Tanggal Input
-                { wch: 32 },  // Nama Part
-                { wch: 38 },  // Standar Cek
-                { wch: 42 },  // Metode Cek
-                { wch: 20 },  // Status Abnormality
-                { wch: 18 },  // Nomor EWO
-                { wch: 24 }   // Diinput Oleh
-            ];
-
-            // Atur tinggi baris header dan baris data agar lega
-            ws["!rows"] = [
-                { hpt: 26 },
-                { hpt: 18 },
-                { hpt: 10 },
-                { hpt: 24 }
-            ];
-
-            // Aktifkan AutoFilter langsung pada baris header tabel (baris ke-4 / A4:J...)
-            ws["!autofilter"] = { ref: `A4:J${dataToExport.length + 4}` };
-
-            XLSX.utils.book_append_sheet(wb, ws, "Laporan Checklist");
-            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-        }
-
-        function exportLaporanPDF() {
-            const dataToExport = getFilteredLaporanForExport();
-            if (dataToExport.length === 0) {
-                showModal({
-                    title: "Data Kosong",
-                    message: "Tidak ada data laporan untuk diekspor ke PDF.",
-                    type: "warning"
-                });
-                return;
-            }
-
-            if (!window.jspdf || !window.jspdf.jsPDF) {
-                showModal({
-                    title: "Library Belum Siap",
-                    message: "Pustaka PDF sedang dimuat. Silakan coba beberapa detik lagi.",
-                    type: "warning"
-                });
-                return;
-            }
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-
-            const todayStr = new Date().toLocaleDateString('id-ID', {
-                day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-            const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
-            const normalCount = dataToExport.length - abnormalCount;
-
-            // Header Banner Perusahaan
-            doc.setFillColor(24, 152, 200);
-            doc.rect(14, 12, 269, 18, "F");
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(13);
-            doc.text("PT. DAYA ANUGRAH MULYA (DAM)", 18, 19.5);
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9.5);
-            doc.text("LAPORAN PREVENTIVE MAINTENANCE & CHECKLIST INSPEKSI MESIN", 18, 25.5);
-
-            // Info Ringkasan di bawah header
-            doc.setTextColor(51, 65, 85);
-            doc.setFontSize(8.5);
-            doc.text(`Tanggal Cetak: ${todayStr} WIB   |   Dicetak Oleh: ${currentUser ? currentUser.username : '-'}`, 14, 36);
-            doc.text(`Total Inspeksi: ${dataToExport.length}   |   Normal: ${normalCount}   |   Abnormality: ${abnormalCount}`, 283, 36, { align: "right" });
-
-            const tableHeaders = [[
-                "No",
-                "ID Laporan",
-                "PIC",
-                "Tanggal",
-                "Nama Part",
-                "Standar Cek",
-                "Metode Cek",
-                "Abnormality",
-                "No. EWO"
-            ]];
-
-            const tableRows = dataToExport.map((item, idx) => [
-                idx + 1,
-                item.id || "-",
-                item.pic || "-",
-                formatTanggalRingkas(item.tanggalInput),
-                item.namaPart || "-",
-                item.standarCek || "-",
-                item.metodeCek || "-",
-                item.abnormality === "Ya" ? "Ya" : "Tidak",
-                item.nomorEwo || "-"
-            ]);
-
-            doc.autoTable({
-                startY: 40,
-                head: tableHeaders,
-                body: tableRows,
-                theme: "grid",
-                styles: {
-                    font: "helvetica",
-                    fontSize: 7.5,
-                    cellPadding: 2.5,
-                    valign: "top",
-                    textColor: [30, 41, 59],
-                    lineColor: [203, 213, 225],
-                    lineWidth: 0.2
-                },
-                headStyles: {
-                    fillColor: [30, 41, 59],
-                    textColor: [255, 255, 255],
-                    fontStyle: "bold",
-                    halign: "center",
-                    valign: "middle"
-                },
-                alternateRowStyles: {
-                    fillColor: [248, 250, 252]
-                },
-                columnStyles: {
-                    0: { cellWidth: 9, halign: "center" },
-                    1: { cellWidth: 28, fontStyle: "bold" },
-                    2: { cellWidth: 22 },
-                    3: { cellWidth: 25 },
-                    4: { cellWidth: 36, fontStyle: "bold" },
-                    5: { cellWidth: 48 },
-                    6: { cellWidth: 57 },
-                    7: { cellWidth: 20, halign: "center", fontStyle: "bold" },
-                    8: { cellWidth: 24, halign: "center" }
-                },
-                didParseCell: function (data) {
-                    if (data.section === "body" && data.column.index === 7) {
-                        if (data.cell.raw === "Ya") {
-                            data.cell.styles.textColor = [190, 18, 60];
-                            data.cell.styles.fillColor = [255, 228, 230];
-                        } else {
-                            data.cell.styles.textColor = [4, 120, 87];
-                        }
-                    }
-                },
-                didDrawPage: function (data) {
-                    const pageCount = doc.internal.getNumberOfPages();
-                    doc.setFontSize(8);
-                    doc.setTextColor(100, 116, 139);
-                    doc.text(
-                        `Halaman ${data.pageNumber} dari ${pageCount}`,
-                        283,
-                        doc.internal.pageSize.getHeight() - 8,
-                        { align: "right" }
-                    );
-                }
-            });
-
-            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.pdf`;
-            doc.save(fileName);
-        }
-
         // =========================================================================
         // 1. KONFIGURASI ENDPOINT API GOOGLE APPS SCRIPT & STATE GLOBAL
         // =========================================================================
@@ -1018,9 +770,10 @@
         let sessionToken = null;
         let dashCharts = { daily: null, pie: null, topParts: null, pic: null };
 
+        // Hanya Supervisor & Admin yang dapat Edit, Delete, maupun Export Excel/PDF
         function isSupervisor() {
             if (!currentUser || !currentUser.role) return false;
-            const r = String(currentUser.role).toLowerCase();
+            const r = String(currentUser.role).trim().toLowerCase();
             return r === "supervisor" || r === "admin";
         }
 
@@ -1051,7 +804,6 @@
                 throw new Error("URL Web App Apps Script belum diatur. Silakan tempel URL /exec pada pengaturan di atas.");
             }
 
-            // Gunakan text/plain agar bebas dari CORS OPTIONS preflight di Google Apps Script
             const response = await fetch(apiUrl, {
                 method: "POST",
                 headers: {
@@ -1117,7 +869,7 @@
         }
 
         // =========================================================================
-        // 3. SISTEM LOGIN, RBAC & LOGOUT
+        // 3. SISTEM LOGIN, RBAC (USER HANYA INPUT) & LOGOUT
         // =========================================================================
         function togglePassword() {
             const input = document.getElementById('loginPassword');
@@ -1138,13 +890,22 @@
         }
 
         function applyRolePermissions() {
-            if (isSupervisor()) {
+            const canManage = isSupervisor();
+            if (canManage) {
                 safeRemoveClass('dbFormCard', 'hidden');
                 safeAddClass('dbReadOnlyBanner', 'hidden');
+                safeRemoveClass('laporanExportGroup', 'hidden');
+                safeRemoveClass('thLaporanAksi', 'hidden');
+                safeRemoveClass('thDatabaseAksi', 'hidden');
             } else {
+                // User / Operator / Teknisi: Hanya bisa input data laporan
+                // Tidak bisa edit/delete database & laporan, serta tidak bisa export Excel/PDF
                 safeAddClass('dbFormCard', 'hidden');
                 safeRemoveClass('dbReadOnlyBanner', 'hidden');
-                safeSetText('dbRoleNotice', currentUser ? currentUser.role : "Operator");
+                safeAddClass('laporanExportGroup', 'hidden');
+                safeAddClass('thLaporanAksi', 'hidden');
+                safeAddClass('thDatabaseAksi', 'hidden');
+                safeSetText('dbRoleNotice', currentUser ? currentUser.role : "User");
             }
         }
 
@@ -1521,10 +1282,13 @@
         }
 
         // =========================================================================
-        // 6. LOGIKA SHEET DATABASE
+        // 6. LOGIKA SHEET DATABASE (KHUSUS SUPERVISOR / ADMIN)
         // =========================================================================
         function editDatabaseItem(id) {
-            if (!isSupervisor()) return;
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "User tidak memiliki izin untuk mengedit data.", type: "danger" });
+                return;
+            }
             const item = databaseSheet.find(d => d.id === id);
             if (!item) return;
 
@@ -1552,7 +1316,10 @@
         }
 
         function deleteDatabaseItem(id) {
-            if (!isSupervisor()) return;
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "User tidak memiliki izin untuk menghapus data.", type: "danger" });
+                return;
+            }
             const item = databaseSheet.find(d => d.id === id);
             if (!item) return;
 
@@ -1599,6 +1366,7 @@
             const searchEl = document.getElementById('searchDatabase');
             const keyword = searchEl ? searchEl.value.toLowerCase() : "";
             const canEdit = isSupervisor();
+            const colSpanCount = canEdit ? 8 : 7;
 
             const filtered = databaseSheet.filter(item =>
                 String(item.id).toLowerCase().includes(keyword) ||
@@ -1609,7 +1377,7 @@
             );
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Belum ada data di Sheet Database.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="py-8 text-center text-slate-400">Belum ada data di Sheet Database.</td></tr>`;
                 return;
             }
 
@@ -1634,8 +1402,8 @@
                             <i class="fa-solid fa-user text-[10px]"></i> ${escapeHtml(item.pic)}
                         </span>
                     </td>
-                    <td class="py-3 px-4 text-center">
-                        ${canEdit ? `
+                    ${canEdit ? `
+                        <td class="py-3 px-4 text-center">
                             <div class="flex items-center justify-center gap-1.5">
                                 <button type="button" onclick="editDatabaseItem('${item.id}')" title="Edit" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition">
                                     <i class="fa-solid fa-pen"></i>
@@ -1644,8 +1412,8 @@
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
-                        ` : `<span class="text-[11px] text-slate-400 italic">Read-only</span>`}
-                    </td>
+                        </td>
+                    ` : ``}
                 </tr>
             `).join('');
         }
@@ -1778,7 +1546,10 @@
         }
 
         function deleteLaporanItem(id) {
-            if (!isSupervisor()) return;
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "User tidak memiliki izin untuk menghapus laporan.", type: "danger" });
+                return;
+            }
             showModal({
                 title: "Hapus Data Laporan?",
                 message: `Anda yakin ingin menghapus laporan dengan ID ${id}?`,
@@ -1818,6 +1589,7 @@
             const searchEl = document.getElementById('searchLaporan');
             const keyword = searchEl ? searchEl.value.toLowerCase() : "";
             const canDelete = isSupervisor();
+            const colSpanCount = canDelete ? 12 : 11;
 
             const filtered = laporanSheet.filter(item =>
                 String(item.id).toLowerCase().includes(keyword) ||
@@ -1827,7 +1599,7 @@
             );
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" class="py-8 text-center text-slate-400">Belum ada data laporan yang tersimpan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="py-8 text-center text-slate-400">Belum ada data laporan yang tersimpan.</td></tr>`;
                 return;
             }
 
@@ -1879,59 +1651,274 @@
                         <td class="py-3.5 px-4 font-mono font-semibold whitespace-nowrap ${isAbnormal ? 'text-rose-600' : 'text-slate-400'}">
                             ${escapeHtml(item.nomorEwo)}
                         </td>
-                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                            ${canDelete ? `
+                        ${canDelete ? `
+                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
                                 <button type="button" onclick="deleteLaporanItem('${item.id}')" title="Hapus Laporan" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
-                            ` : `<span class="text-[11px] text-slate-400 italic">-</span>`}
-                        </td>
+                            </td>
+                        ` : ``}
                     </tr>
                 `;
             }).join('');
         }
 
         // =========================================================================
-        // 8. EXPORT CSV
+        // 8. EXPORT EXCEL (.XLSX) & EXPORT PDF (KHUSUS SUPERVISOR / ADMIN)
         // =========================================================================
-        function exportLaporanCSV() {
-            if (laporanSheet.length === 0) {
+        function getFilteredLaporanForExport() {
+            const searchEl = document.getElementById('searchLaporan');
+            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+            return laporanSheet.filter(item =>
+                String(item.id).toLowerCase().includes(keyword) ||
+                String(item.pic).toLowerCase().includes(keyword) ||
+                String(item.namaPart).toLowerCase().includes(keyword) ||
+                String(item.nomorEwo).toLowerCase().includes(keyword)
+            );
+        }
+
+        function exportLaporanExcel() {
+            if (!isSupervisor()) {
+                showModal({
+                    title: "Akses Ditolak",
+                    message: "Akun User tidak memiliki izin untuk mengekspor data ke Excel.",
+                    type: "danger"
+                });
+                return;
+            }
+
+            const dataToExport = getFilteredLaporanForExport();
+            if (dataToExport.length === 0) {
                 showModal({
                     title: "Data Kosong",
-                    message: "Tidak ada data laporan untuk diekspor.",
+                    message: "Tidak ada data laporan untuk diekspor ke Excel.",
                     type: "warning"
                 });
                 return;
             }
 
-            const headers = [
-                "ID", "PIC", "Tanggal Input", "Nama Part", 
-                "Standar Cek", "Metode Cek", "Apakah ada abnormality?", "Nomor EWO", "Diinput Oleh"
+            if (typeof XLSX === 'undefined') {
+                showModal({
+                    title: "Library Belum Siap",
+                    message: "Pustaka Excel sedang dimuat. Silakan coba beberapa detik lagi.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            const todayStr = new Date().toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric'
+            });
+            const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
+            const normalCount = dataToExport.length - abnormalCount;
+
+            const wsData = [
+                ["PT. DAYA ANUGRAH MULYA - LAPORAN CHECKLIST & INSPEKSI MESIN"],
+                [`Tanggal Cetak: ${todayStr} | Dicetak Oleh: ${currentUser ? currentUser.username : '-'} | Total Data: ${dataToExport.length} (Normal: ${normalCount}, Abnormality: ${abnormalCount})`],
+                [],
+                [
+                    "No",
+                    "ID Laporan",
+                    "PIC",
+                    "Tanggal Input",
+                    "Nama Part",
+                    "Standar Cek",
+                    "Metode Cek",
+                    "Status Abnormality",
+                    "Nomor EWO",
+                    "Diinput Oleh"
+                ]
             ];
 
-            const rows = laporanSheet.map(item => [
-                item.id,
-                item.pic,
-                String(item.tanggalInput).replace('T', ' '),
-                item.namaPart,
-                item.standarCek,
-                item.metodeCek,
-                item.abnormality,
-                item.nomorEwo,
-                item.createdBy || "-"
+            dataToExport.forEach((item, index) => {
+                wsData.push([
+                    index + 1,
+                    item.id || "-",
+                    item.pic || "-",
+                    formatTanggalRingkas(item.tanggalInput),
+                    item.namaPart || "-",
+                    item.standarCek || "-",
+                    item.metodeCek || "-",
+                    item.abnormality === "Ya" ? "Ya (Abnormality)" : "Tidak (Normal)",
+                    item.nomorEwo || "-",
+                    item.createdBy || "-"
+                ]);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            ws["!merges"] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } }
+            ];
+
+            ws["!cols"] = [
+                { wch: 5 },
+                { wch: 20 },
+                { wch: 18 },
+                { wch: 18 },
+                { wch: 32 },
+                { wch: 38 },
+                { wch: 42 },
+                { wch: 20 },
+                { wch: 18 },
+                { wch: 24 }
+            ];
+
+            ws["!rows"] = [
+                { hpt: 26 },
+                { hpt: 18 },
+                { hpt: 10 },
+                { hpt: 24 }
+            ];
+
+            ws["!autofilter"] = { ref: `A4:J${dataToExport.length + 4}` };
+
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Checklist");
+            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+
+        function exportLaporanPDF() {
+            if (!isSupervisor()) {
+                showModal({
+                    title: "Akses Ditolak",
+                    message: "Akun User tidak memiliki izin untuk mengekspor data ke PDF.",
+                    type: "danger"
+                });
+                return;
+            }
+
+            const dataToExport = getFilteredLaporanForExport();
+            if (dataToExport.length === 0) {
+                showModal({
+                    title: "Data Kosong",
+                    message: "Tidak ada data laporan untuk diekspor ke PDF.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                showModal({
+                    title: "Library Belum Siap",
+                    message: "Pustaka PDF sedang dimuat. Silakan coba beberapa detik lagi.",
+                    type: "warning"
+                });
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+            const todayStr = new Date().toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            const abnormalCount = dataToExport.filter(i => i.abnormality === "Ya").length;
+            const normalCount = dataToExport.length - abnormalCount;
+
+            doc.setFillColor(24, 152, 200);
+            doc.rect(14, 12, 269, 18, "F");
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(13);
+            doc.text("PT. DAYA ANUGRAH MULYA (DAM)", 18, 19.5);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9.5);
+            doc.text("LAPORAN PREVENTIVE MAINTENANCE & CHECKLIST INSPEKSI MESIN", 18, 25.5);
+
+            doc.setTextColor(51, 65, 85);
+            doc.setFontSize(8.5);
+            doc.text(`Tanggal Cetak: ${todayStr} WIB   |   Dicetak Oleh: ${currentUser ? currentUser.username : '-'}`, 14, 36);
+            doc.text(`Total Inspeksi: ${dataToExport.length}   |   Normal: ${normalCount}   |   Abnormality: ${abnormalCount}`, 283, 36, { align: "right" });
+
+            const tableHeaders = [[
+                "No",
+                "ID Laporan",
+                "PIC",
+                "Tanggal",
+                "Nama Part",
+                "Standar Cek",
+                "Metode Cek",
+                "Abnormality",
+                "No. EWO"
+            ]];
+
+            const tableRows = dataToExport.map((item, idx) => [
+                idx + 1,
+                item.id || "-",
+                item.pic || "-",
+                formatTanggalRingkas(item.tanggalInput),
+                item.namaPart || "-",
+                item.standarCek || "-",
+                item.metodeCek || "-",
+                item.abnormality === "Ya" ? "Ya" : "Tidak",
+                item.nomorEwo || "-"
             ]);
 
-            let csvContent = "data:text/csv;charset=utf-8," 
-                + headers.join(",") + "\n"
-                + rows.map(r => r.map(field => `"${String(field).replace(/"/g, '""')}"`).join(",")).join("\n");
+            doc.autoTable({
+                startY: 40,
+                head: tableHeaders,
+                body: tableRows,
+                theme: "grid",
+                styles: {
+                    font: "helvetica",
+                    fontSize: 7.5,
+                    cellPadding: 2.5,
+                    valign: "top",
+                    textColor: [30, 41, 59],
+                    lineColor: [203, 213, 225],
+                    lineWidth: 0.2
+                },
+                headStyles: {
+                    fillColor: [30, 41, 59],
+                    textColor: [255, 255, 255],
+                    fontStyle: "bold",
+                    halign: "center",
+                    valign: "middle"
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                columnStyles: {
+                    0: { cellWidth: 9, halign: "center" },
+                    1: { cellWidth: 28, fontStyle: "bold" },
+                    2: { cellWidth: 22 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 36, fontStyle: "bold" },
+                    5: { cellWidth: 48 },
+                    6: { cellWidth: 57 },
+                    7: { cellWidth: 20, halign: "center", fontStyle: "bold" },
+                    8: { cellWidth: 24, halign: "center" }
+                },
+                didParseCell: function (data) {
+                    if (data.section === "body" && data.column.index === 7) {
+                        if (data.cell.raw === "Ya") {
+                            data.cell.styles.textColor = [190, 18, 60];
+                            data.cell.styles.fillColor = [255, 228, 230];
+                        } else {
+                            data.cell.styles.textColor = [4, 120, 87];
+                        }
+                    }
+                },
+                didDrawPage: function (data) {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFontSize(8);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(
+                        `Halaman ${data.pageNumber} dari ${pageCount}`,
+                        283,
+                        doc.internal.pageSize.getHeight() - 8,
+                        { align: "right" }
+                    );
+                }
+            });
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Laporan_Checklist_Mesin_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const fileName = `Laporan_Checklist_Mesin_DAM_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(fileName);
         }
 
         // =========================================================================
@@ -2114,7 +2101,10 @@
             if (databaseForm) {
                 databaseForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
-                    if (!isSupervisor()) return;
+                    if (!isSupervisor()) {
+                        showModal({ title: "Akses Ditolak", message: "User tidak diizinkan mengubah Database.", type: "danger" });
+                        return;
+                    }
 
                     const originalId = document.getElementById('dbOriginalId')?.value.trim() || "";
                     const customPartId = document.getElementById('dbPartIdInput')?.value.trim() || "";
@@ -2158,7 +2148,7 @@
                 });
             }
 
-            // 3. Form Input Laporan
+            // 3. Form Input Laporan (Dapat digunakan oleh User maupun Supervisor)
             const laporanForm = document.getElementById('laporanForm');
             if (laporanForm) {
                 laporanForm.addEventListener('submit', async function(e) {
