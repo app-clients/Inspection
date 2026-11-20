@@ -1,0 +1,2821 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CILT Execution - Autonomous Maintenance App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Dashboard Analitik -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (XLSX) untuk Export Excel Terformat -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF & AutoTable untuk Export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- ==================== MODAL NOTIFIKASI & KONFIRMASI ==================== -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 transform transition-all">
+            <div class="flex items-center gap-3 mb-3">
+                <div id="modalIcon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg"></div>
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-900">Judul</h3>
+            </div>
+            <p id="modalMessage" class="text-sm text-slate-600 mb-6 leading-relaxed">Pesan</p>
+            <div id="modalActions" class="flex justify-end gap-2"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL PREVIEW GAMBAR BESAR ==================== -->
+    <div id="imagePreviewModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeImagePreview()">
+        <div class="relative max-w-3xl w-full bg-white rounded-2xl p-2 shadow-2xl" onclick="event.stopPropagation()">
+            <button type="button" onclick="closeImagePreview()" class="absolute -top-3 -right-3 bg-rose-600 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center hover:bg-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="previewModalImg" src="" alt="Preview" class="w-full max-h-[80vh] object-contain rounded-xl bg-slate-100">
+            <p id="previewModalCaption" class="text-center text-sm font-medium text-slate-700 py-2"></p>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL / POPUP MASA TRIAL BERAKHIR (LOCK SCREEN) ==================== -->
+    <div id="trialExpiredModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 animate-fade-in">
+            <!-- Header Popup -->
+            <div class="bg-gradient-to-r from-rose-600 via-amber-600 to-rose-700 p-6 text-white text-center relative">
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-sm border border-white/30 shadow-inner">
+                    <i class="fa-solid fa-hourglass-end text-3xl text-white"></i>
+                </div>
+                <span class="inline-block px-3 py-0.5 bg-black/25 rounded-full text-[10px] font-bold uppercase tracking-widest mb-1.5">
+                    Status Lisensi: Nonaktif
+                </span>
+                <h2 class="text-xl font-bold tracking-tight">Masa Paket Trial Telah Berakhir</h2>
+                <p class="text-rose-100 text-xs mt-1">Akses ke aplikasi CILT Execution sementara dibatasi</p>
+            </div>
+
+            <!-- Isi / Keterangan Pembayaran -->
+            <div class="p-6 space-y-4">
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed text-center">
+                    Terima kasih telah menggunakan masa uji coba aplikasi <strong>CILT Execution - Autonomous Maintenance App</strong>. Periode trial Anda telah habis. Untuk menghilangkan popup ini dan mengaktifkan lisensi penuh secara permanen, silakan selesaikan pembayaran biaya langganan/pengembangan.
+                </p>
+
+                <!-- Rincian Tagihan / Rekening -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5 text-xs">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <span class="text-slate-500 font-medium">Paket Aktivasi:</span>
+                        <span class="font-bold text-slate-800">Full Lisensi (Unlimited User)</span>
+                    </div>
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <span class="text-slate-500 font-medium">Biaya Aktivasi:</span>
+                        <span class="font-bold text-emerald-700 text-sm">Hubungi Administrator / Developer</span>
+                    </div>
+                    <div class="pt-0.5 space-y-1">
+                        <span class="text-[11px] font-semibold text-slate-500 block">Informasi Pembayaran / Konfirmasi:</span>
+                        <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-2">
+                            <div>
+                                <p class="text-[11px] font-bold text-emerald-800">Bank Syariah Indonesia (BSI)</p>
+                                <p id="rekeningNumberText" class="font-mono font-bold text-slate-900 text-sm tracking-wide">7349728731</p>
+                                <p class="text-xs font-semibold text-emerald-700">a.n OBAN SOBANDI</p>
+                            </div>
+                            <button type="button" onclick="copyRekeningNumber()" id="btnCopyRekening"
+                                class="px-3 py-1.5 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 shrink-0">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Salin</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Kode Aktivasi (Opsional untuk membuka kunci setelah bayar) -->
+                <div class="pt-1">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                        Sudah Membayar? Masukkan Kode Aktivasi
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" id="trialActivationCodeInput" placeholder="Contoh: 1387-PRO-EXEC"
+                            class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono uppercase focus:ring-2 focus:ring-emerald-600 outline-none">
+                        <button type="button" onclick="verifyTrialActivationCode()"
+                            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition whitespace-nowrap">
+                            Aktifkan
+                        </button>
+                    </div>
+                    <p id="trialActivationError" class="hidden text-[11px] text-rose-600 font-medium mt-1.5">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Kode aktivasi tidak valid. Silakan selesaikan pembayaran terlebih dahulu.
+                    </p>
+                </div>
+
+                <!-- Tombol Aksi Konfirmasi Pembayaran -->
+                <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
+                    <a href="https://wa.me/6287889621270?text=Halo%20Admin,%20saya%20ingin%20melakukan%20pembayaran%20aktivasi%20aplikasi%20CILT%20Execution" target="_blank" rel="noopener noreferrer"
+                        class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
+                        <i class="fa-brands fa-whatsapp text-base"></i>
+                        <span>Konfirmasi & Bayar via WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL CLOSING NOMOR NOTIF (SUPERVISOR / ADMIN / MAINTENANCE) ==================== -->
+    <div id="closeNotifModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeNotifModalDialog()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200" onclick="event.stopPropagation()">
+            <div class="bg-emerald-900 text-white px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-lime-400 text-lg"></i>
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">Closing Nomor Notif</h3>
+                        <p class="text-[11px] text-emerald-200">Verifikasi penyelesaian perbaikan Maintenance</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeNotifModalDialog()" class="text-emerald-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="closeNotifForm" class="p-6 space-y-4">
+                <input type="hidden" id="closeNotifLapId" value="">
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-600">Nomor Notif:</span>
+                        <span id="closeNotifNoDisplay" class="font-mono font-bold text-rose-600 text-sm">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-600">Nama Part:</span>
+                        <span id="closeNotifPartDisplay" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div class="pt-1 border-t border-amber-200/70">
+                        <span class="font-semibold text-slate-600 block">Temuan Awal:</span>
+                        <span id="closeNotifKetAwalDisplay" class="text-slate-700">-</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Tindakan Perbaikan / Catatan Closing <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea id="closeNotifCatatan" rows="3" required placeholder="Contoh: Penggantian bearing baru, alignment ulang & tes running 15 menit normal..."
+                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none"></textarea>
+                </div>
+
+                <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/70">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">
+                        <i class="fa-solid fa-camera text-emerald-600 mr-1"></i> Foto Bukti Setelah Perbaikan <span class="text-slate-400 font-normal">(Opsional)</span>
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <div class="w-24 h-20 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                            <img id="previewClosePerbaikan" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Setelah Perbaikan')">
+                            <span id="placeholderClosePerbaikan" class="text-[10px] text-slate-400 text-center px-1">Belum ada foto</span>
+                        </div>
+                        <div class="flex-1">
+                            <label class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-xs transition">
+                                <i class="fa-solid fa-camera"></i>
+                                <span>Ambil / Pilih Foto Perbaikan</span>
+                                <input type="file" id="inputFotoPerbaikan" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewClosePerbaikan', 'placeholderClosePerbaikan', 'closePerbaikan')">
+                            </label>
+                            <p class="text-[11px] text-slate-500 mt-1">Dokumentasi kondisi part setelah selesai diperbaiki.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeNotifModalDialog()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitCloseNotif" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span>Konfirmasi Close Notif</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL EDIT DATA INPUT LAPORAN (KETERANGAN & STATUS NOTIF) ==================== -->
+    <div id="editLaporanModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeEditLaporanModal()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[92vh] overflow-y-auto border border-slate-200" onclick="event.stopPropagation()">
+            <div class="bg-emerald-900 text-white px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-pen-to-square text-lime-400 text-lg"></i>
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">Edit Data Input Laporan</h3>
+                        <p class="text-[11px] text-emerald-200">Perbarui keterangan, Nomor Notif, atau status pekerjaan Maintenance</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditLaporanModal()" class="text-emerald-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="editLaporanForm" class="p-6 space-y-4">
+                <input type="hidden" id="editLapId" value="">
+
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-slate-500 block">ID Laporan:</span>
+                        <span id="editLapIdDisplay" class="font-mono font-bold text-emerald-700">-</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">PIC / Tanggal:</span>
+                        <span id="editLapPicDateDisplay" class="font-semibold text-slate-800">-</span>
+                    </div>
+                    <div class="sm:col-span-2 pt-1 border-t border-slate-200/80">
+                        <span class="text-slate-500 block">Nama Part:</span>
+                        <span id="editLapPartDisplay" class="font-bold text-slate-900">-</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Status Abnormality</label>
+                        <select id="editLapAbnormality" onchange="onEditAbnormalityChange()" class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-600 outline-none">
+                            <option value="Tidak">Tidak (Normal)</option>
+                            <option value="Ya">Ya (Abnormal)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Notif</label>
+                        <input type="text" id="editLapNomorNotif" placeholder="Contoh: NTF-2026-0045"
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-emerald-600 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">
+                        Keterangan <span class="text-slate-400 font-normal">(Tambahkan info jika No. Notif sudah dikerjakan Maintenance)</span>
+                    </label>
+                    <textarea id="editLapKeterangan" rows="2" placeholder="Contoh: No Notif sudah dikerjakan oleh tim Maintenance pada shift 1..."
+                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none"></textarea>
+                </div>
+
+                <div id="editNotifSection" class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                            <i class="fa-solid fa-screwdriver-wrench mr-1"></i> Tindak Lanjut Tim Maintenance
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-slate-700">Status Notif:</label>
+                            <select id="editLapStatusNotif" class="px-3 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-emerald-600 outline-none">
+                                <option value="Open">Open (Belum Selesai)</option>
+                                <option value="Closed">Closed (Sudah Dikerjakan)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Perbaikan / Penyelesaian Maintenance</label>
+                        <textarea id="editLapCatatanClose" rows="2" placeholder="Contoh: Sudah dikerjakan tim Maintenance (penggantian part & tes running OK)..."
+                            class="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600 outline-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Foto Bukti Perbaikan <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                        <div class="flex items-center gap-3">
+                            <div class="w-20 h-16 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                <img id="previewEditPerbaikan" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Bukti Perbaikan')">
+                                <span id="placeholderEditPerbaikan" class="text-[10px] text-slate-400 text-center px-1">Belum ada foto</span>
+                            </div>
+                            <label class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-xs transition">
+                                <i class="fa-solid fa-camera"></i>
+                                <span>Unggah / Ganti Foto Perbaikan</span>
+                                <input type="file" id="inputEditFotoPerbaikan" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewEditPerbaikan', 'placeholderEditPerbaikan', 'editPerbaikan')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeEditLaporanModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition">
+                        Batal
+                    </button>
+                    <button type="submit" id="btnSubmitEditLaporan" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Perubahan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== HALAMAN 1: LOGIN ==================== -->
+    <div id="loginSection" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-emerald-900/20">
+            <div class="bg-gradient-to-b from-white via-emerald-50/40 to-emerald-50/80 border-b border-emerald-100 p-6 text-center relative">
+                <div class="inline-flex items-center justify-center mx-auto mb-2">
+                    <!-- Logo ENESIS GROUP -->
+                    <svg viewBox="0 0 260 155" class="h-24 w-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enesis Group">
+                        <path d="M123 14 C118 32, 102 45, 104 64 C105 76, 115 83, 122 93 C125 97, 127 101, 129 104 L133 101 C130 96, 126 90, 124 85 C135 76, 142 63, 141 47 C140 33, 131 22, 123 14 Z M123 32 C128 39, 132 47, 131 57 C130 66, 125 73, 118 78 C113 71, 111 63, 113 54 C115 45, 120 39, 123 32 Z" fill="#008B45"/>
+                        <path d="M148 41 C150 53, 145 64, 137 73 C131 80, 128 88, 132 98 L136 96 C134 89, 137 83, 143 77 C153 68, 158 55, 148 41 Z" fill="#8CC63F"/>
+                        <circle cx="146" cy="30" r="5.5" fill="#F5A623"/>
+                        <text x="130" y="130" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600" letter-spacing="5" fill="#1e293b" text-anchor="middle">ENESIS</text>
+                        <path d="M46 144 Q64 148 78 144 T103 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                        <text x="130" y="147" font-family="Inter, Arial, sans-serif" font-size="11.5" font-weight="600" letter-spacing="2.5" fill="#1e293b" text-anchor="middle">GROUP</text>
+                        <path d="M157 144 Q173 140 187 144 T214 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1 class="text-lg font-bold tracking-tight text-emerald-900">CILT EXECUTION</h1>
+                <p class="text-emerald-700/80 text-xs mt-0.5">Autonomous Maintenance App</p>
+                <p class="text-slate-600 font-semibold text-xs mt-1">PT. Herlina Indah</p>
+            </div>
+
+            <!-- Panel Konfigurasi Endpoint API Apps Script -->
+            <div id="apiConfigPanel" class="hidden bg-slate-50 border-b border-slate-200 p-4 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                        <i class="fa-solid fa-link text-emerald-600 mr-1"></i> URL Web App Google Apps Script
+                    </label>
+                    <span id="apiStatusBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Belum Diatur</span>
+                </div>
+                <input type="url" id="gasApiUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+                    class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-emerald-600 outline-none">
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="saveGasApiUrl()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
+                        Simpan Endpoint
+                    </button>
+                </div>
+            </div>
+
+            <form id="loginForm" class="p-6 sm:p-8 space-y-5" autocomplete="off">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nama Pengguna (Username)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="loginUsername" required placeholder="Masukkan nama pengguna..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" required placeholder="Masukkan password..."
+                            class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 outline-none transition">
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loginError" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs p-3 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="loginErrorText">Nama atau password salah!</span>
+                </div>
+
+                <button type="submit" id="btnLoginSubmit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                    <span>Masuk ke Aplikasi</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== HALAMAN 2: DASHBOARD UTAMA ==================== -->
+    <div id="appSection" class="hidden flex-1 flex flex-col">
+        <!-- Top Navbar -->
+        <header class="bg-white border-b border-emerald-100 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center justify-center">
+                        <!-- Logo ENESIS GROUP Navbar -->
+                        <svg viewBox="0 0 260 155" class="h-12 w-auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enesis Group">
+                            <path d="M123 14 C118 32, 102 45, 104 64 C105 76, 115 83, 122 93 C125 97, 127 101, 129 104 L133 101 C130 96, 126 90, 124 85 C135 76, 142 63, 141 47 C140 33, 131 22, 123 14 Z M123 32 C128 39, 132 47, 131 57 C130 66, 125 73, 118 78 C113 71, 111 63, 113 54 C115 45, 120 39, 123 32 Z" fill="#008B45"/>
+                            <path d="M148 41 C150 53, 145 64, 137 73 C131 80, 128 88, 132 98 L136 96 C134 89, 137 83, 143 77 C153 68, 158 55, 148 41 Z" fill="#8CC63F"/>
+                            <circle cx="146" cy="30" r="5.5" fill="#F5A623"/>
+                            <text x="130" y="130" font-family="Inter, Arial, sans-serif" font-size="31" font-weight="600" letter-spacing="5" fill="#1e293b" text-anchor="middle">ENESIS</text>
+                            <path d="M46 144 Q64 148 78 144 T103 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                            <text x="130" y="147" font-family="Inter, Arial, sans-serif" font-size="11.5" font-weight="600" letter-spacing="2.5" fill="#1e293b" text-anchor="middle">GROUP</text>
+                            <path d="M157 144 Q173 140 187 144 T214 144" fill="none" stroke="#1e293b" stroke-width="2.2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="hidden sm:block border-l border-slate-200 pl-3">
+                        <h1 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">CILT Execution</h1>
+                        <p class="text-[11px] text-emerald-700 font-medium">Autonomous Maintenance App</p>
+                    </div>
+                </div>
+
+                <!-- Navigasi User & Sync -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="hidden md:flex items-center gap-2 bg-emerald-50/70 border border-emerald-200/70 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-700">
+                        <i class="fa-solid fa-user-shield text-emerald-600"></i>
+                        <span>Login: <strong id="currentUserDisplay">User</strong></span>
+                    </div>
+                    <button type="button" onclick="loadDataFromServer()" title="Muat Ulang Data dari Google Sheets" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i id="syncIcon" class="fa-solid fa-rotate"></i>
+                        <span class="hidden sm:inline">Sync Sheets</span>
+                    </button>
+                    <button type="button" onclick="handleLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-Navbar (Sheet Tabs) -->
+            <div class="bg-emerald-50/40 border-t border-emerald-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2 overflow-x-auto py-2">
+                    <button type="button" onclick="switchTab('dashboard')" id="tabBtnDashboard" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-emerald-100/60">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Dashboard Monitoring</span>
+                    </button>
+                    <button type="button" onclick="switchTab('laporan')" id="tabBtnLaporan" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-emerald-600 text-white shadow-sm">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>Sheet Input Laporan</span>
+                        <span id="badgeLaporanCount" class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button type="button" onclick="switchTab('database')" id="tabBtnDatabase" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-emerald-100/60">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Sheet Database</span>
+                        <span id="badgeDbCount" class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 0: DASHBOARD MONITORING & ANALITIK                                   -->
+            <!-- ========================================================================= -->
+            <div id="viewDashboard" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Dashboard Monitoring & Performa Mesin</h2>
+                        <p class="text-xs text-slate-500">Ringkasan real-time kepatuhan inspeksi, distribusi PIC, dan tindak lanjut Nomor Notif</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-600">Periode:</label>
+                        <select id="dashPeriodFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-600 outline-none">
+                            <option value="ALL">Semua Waktu</option>
+                            <option value="TODAY">Hari Ini</option>
+                            <option value="7D">7 Hari Terakhir</option>
+                            <option value="30D">30 Hari Terakhir</option>
+                            <option value="MONTH">Bulan Ini</option>
+                        </select>
+                        <select id="dashPicFilter" onchange="renderDashboard()" class="px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-600 outline-none">
+                            <option value="ALL">Semua PIC</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 4 Kartu KPI -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Inspeksi</p>
+                            <h3 id="kpiTotalInspeksi" class="text-2xl font-bold text-slate-900 mt-1">0</h3>
+                            <p id="kpiSubInspeksi" class="text-[11px] text-slate-400 mt-1">Laporan tercatat</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cakupan Part</p>
+                            <h3 id="kpiCompletionRate" class="text-2xl font-bold text-lime-600 mt-1">0%</h3>
+                            <p id="kpiSubCompletion" class="text-[11px] text-slate-400 mt-1">0 dari 0 part database</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kondisi Normal</p>
+                            <h3 id="kpiNormalRate" class="text-2xl font-bold text-emerald-700 mt-1">0%</h3>
+                            <p id="kpiSubNormal" class="text-[11px] text-slate-400 mt-1">0 pengecekan normal</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Abnormality / Notif</p>
+                            <h3 id="kpiTotalAbnormal" class="text-2xl font-bold text-amber-600 mt-1">0</h3>
+                            <p id="kpiSubAbnormal" class="text-[11px] font-semibold text-slate-500 mt-1">0 Open | 0 Closed</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Analitik -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Tren Inspeksi & Temuan Abnormality Harian</h3>
+                            <p class="text-[11px] text-slate-400">Perbandingan aktivitas pengecekan normal vs abnormal per tanggal</p>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chartDailyTrend"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Rasio Normal vs Abnormality</h3>
+                            <p class="text-[11px] text-slate-400">Proporsi status kesehatan mesin</p>
+                        </div>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chartStatusPie"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Top 5 Part Paling Sering Abnormality</h3>
+                            <p class="text-[11px] text-slate-400">Identifikasi komponen kritis yang memerlukan perhatian khusus</p>
+                        </div>
+                        <div class="h-60 relative">
+                            <canvas id="chartTopAbnormalParts"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="mb-4">
+                            <h3 class="font-bold text-slate-800 text-sm">Aktivitas Inspeksi per PIC</h3>
+                            <p class="text-[11px] text-slate-400">Jumlah checklist yang diselesaikan oleh masing-masing PIC</p>
+                        </div>
+                        <div class="h-60 relative">
+                            <canvas id="chartPicPerformance"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Khusus Pantauan Abnormality & Closing Nomor Notif -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-rose-50/70 border-b border-rose-100 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-wrench"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-sm">Daftar Pantauan Abnormality & Closing Nomor Notif</h3>
+                                <p class="text-[11px] text-slate-500">Supervisor / Admin / Maintenance dapat menutup Notif yang sudah selesai diperbaiki</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="dashNotifStatusFilter" onchange="renderDashboard()" class="px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-600 outline-none">
+                                <option value="ALL">Status: Semua</option>
+                                <option value="Open">Status: Open</option>
+                                <option value="Closed">Status: Closed</option>
+                            </select>
+                            <span id="dashEwoCountBadge" class="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-full">0 Notif</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <th class="py-3 px-4 whitespace-nowrap">Nomor Notif</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Status Notif</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">Tanggal</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">Nama Part</th>
+                                    <th class="py-3 px-4 whitespace-nowrap">PIC</th>
+                                    <th class="py-3 px-4 min-w-[200px]">Keterangan Temuan</th>
+                                    <th class="py-3 px-4 min-w-[220px]">Tindakan Perbaikan & Close</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
+                                    <th class="py-3 px-4 text-center whitespace-nowrap">Foto Perbaikan</th>
+                                    <th id="thDashNotifAksi" class="py-3 px-4 text-center whitespace-nowrap">Tindak Lanjut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashAbnormalTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 1: SHEET INPUT LAPORAN                                               -->
+            <!-- ========================================================================= -->
+            <div id="viewLaporan" class="space-y-6">
+                
+                <!-- Card Form Input Laporan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-emerald-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-pen-to-square text-lime-400"></i>
+                            <h2 class="font-bold text-base">Form Input Laporan Checklist</h2>
+                        </div>
+                        <span class="text-xs bg-emerald-800 text-emerald-100 px-3 py-1 rounded-lg">Auto-fill dari Sheet Database</span>
+                    </div>
+
+                    <form id="laporanForm" class="p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">ID Laporan (Otomatis)</label>
+                                <input type="text" id="lapId" readonly
+                                    class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-sm font-mono font-semibold text-slate-700 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">PIC (Dari Database PIC) <span class="text-rose-500">*</span></label>
+                                <select id="lapPic" required onchange="onPicSelected()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                                    <option value="">-- Pilih PIC --</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Input <span class="text-rose-500">*</span></label>
+                                <input type="datetime-local" id="lapTanggal" required
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Pilih Nama Part & Auto-Fill dari Database -->
+                        <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-5 sm:p-6 space-y-5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                                    <i class="fa-solid fa-link mr-1"></i> Data Referensi Part (Otomatis dari Sheet Database)
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                <!-- Kolom Kiri: Nama Part, Standar Cek & Metode Cek -->
+                                <div class="lg:col-span-7 space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Part <span class="text-rose-500">*</span></label>
+                                        <select id="lapNamaPart" required onchange="onPartSelected()"
+                                            class="w-full px-4 py-3 bg-white border border-emerald-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-emerald-600 outline-none shadow-sm">
+                                            <option value="">-- Pilih PIC Terlebih Dahulu --</option>
+                                        </select>
+                                        <p id="lapPartHelperText" class="text-[11px] text-slate-500 mt-1">Pilih PIC terlebih dahulu untuk menampilkan daftar part yang sesuai.</p>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Standar Cek (Otomatis)</label>
+                                            <textarea id="lapStandarCek" rows="5" readonly placeholder="Otomatis terisi..."
+                                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm leading-relaxed text-slate-800 resize-y outline-none shadow-xs"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Metode Cek (Otomatis)</label>
+                                            <textarea id="lapMetodeCek" rows="5" readonly placeholder="Otomatis terisi..."
+                                                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm leading-relaxed text-slate-800 resize-y outline-none shadow-xs"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kolom Kanan: Image Part (Database) -->
+                                <div class="lg:col-span-5">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <label class="block text-xs font-semibold text-slate-700">Image Part (Database)</label>
+                                        <span class="text-[11px] text-emerald-700 font-medium"><i class="fa-solid fa-magnifying-glass-plus mr-0.5"></i> Klik foto untuk memperbesar</span>
+                                    </div>
+                                    <div class="h-56 sm:h-64 bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden relative shadow-xs">
+                                        <img id="lapDbImagePreview" src="" alt="Foto Part" class="hidden w-full h-full object-contain bg-slate-50 cursor-pointer p-1" onclick="openImagePreview(this.src, 'Referensi Foto Part (Database)')">
+                                        <div id="lapDbImagePlaceholder" class="text-center p-4 text-slate-400">
+                                            <i class="fa-regular fa-image text-3xl mb-1.5 block"></i>
+                                            <span class="text-xs">Belum ada part dipilih</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Foto Kamera Sebelum Cek & Sesudah Cek -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
+                                <label class="block text-xs font-bold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-camera text-emerald-600 mr-1"></i> Foto Sebelum Cek (Kamera)
+                                </label>
+                                <div class="flex flex-col sm:flex-row items-center gap-4">
+                                    <div class="w-full sm:w-32 h-28 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                        <img id="previewSebelum" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Sebelum Cek')">
+                                        <span id="placeholderSebelum" class="text-xs text-slate-400 text-center px-2">Belum ada foto</span>
+                                    </div>
+                                    <div class="flex-1 w-full">
+                                        <label class="cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
+                                            <i class="fa-solid fa-camera"></i>
+                                            <span>Ambil Foto Sebelum</span>
+                                            <input type="file" id="inputFotoSebelum" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewSebelum', 'placeholderSebelum', 'sebelum')">
+                                        </label>
+                                        <p class="text-[11px] text-slate-500 mt-1.5">Otomatis membuka kamera belakang pada perangkat mobile.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50">
+                                <label class="block text-xs font-bold text-slate-700 mb-2">
+                                    <i class="fa-solid fa-camera-rotate text-emerald-600 mr-1"></i> Foto Sesudah Cek (Kamera)
+                                </label>
+                                <div class="flex flex-col sm:flex-row items-center gap-4">
+                                    <div class="w-full sm:w-32 h-28 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                        <img id="previewSesudah" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Foto Sesudah Cek')">
+                                        <span id="placeholderSesudah" class="text-xs text-slate-400 text-center px-2">Belum ada foto</span>
+                                    </div>
+                                    <div class="flex-1 w-full">
+                                        <label class="cursor-pointer inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
+                                            <i class="fa-solid fa-camera"></i>
+                                            <span>Ambil Foto Sesudah</span>
+                                            <input type="file" id="inputFotoSesudah" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(this, 'previewSesudah', 'placeholderSesudah', 'sesudah')">
+                                        </label>
+                                        <p class="text-[11px] text-slate-500 mt-1.5">Dokumentasi kondisi part setelah pengecekan/pembersihan.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Abnormality, Nomor Notif & Keterangan -->
+                        <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 sm:p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                                        Apakah ada abnormality? <span class="text-amber-700 font-normal">(Jika Ya tulis nomor Notif)</span> <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="flex gap-3">
+                                        <label class="flex-1 cursor-pointer">
+                                            <input type="radio" name="abnormalityStatus" value="Tidak" checked onchange="toggleEwoField()" class="peer hidden">
+                                            <div class="text-center py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 transition">
+                                                <i class="fa-solid fa-check-circle mr-1"></i> Tidak (Normal)
+                                            </div>
+                                        </label>
+                                        <label class="flex-1 cursor-pointer">
+                                            <input type="radio" name="abnormalityStatus" value="Ya" onchange="toggleEwoField()" class="peer hidden">
+                                            <div class="text-center py-2.5 px-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-600 peer-checked:bg-rose-600 peer-checked:text-white peer-checked:border-rose-600 transition">
+                                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Ya (Abnormal)
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="ewoContainer" class="opacity-50 pointer-events-none transition-opacity">
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                                        Nomor Notif <span id="ewoRequiredStar" class="text-rose-500 hidden">*</span>
+                                    </label>
+                                    <input type="text" id="lapNomorEwo" disabled placeholder="Contoh: NTF-2026-0045"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-rose-500 outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                                        Keterangan <span class="text-slate-400 font-normal">(Opsional)</span>
+                                    </label>
+                                    <input type="text" id="lapKeterangan" placeholder="Catatan tambahan hasil pengecekan..."
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Submit -->
+                        <div class="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-slate-100">
+                            <button type="button" onclick="resetLaporanForm()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-sm font-semibold transition">
+                                Reset Form
+                            </button>
+                            <button type="submit" id="btnSubmitLaporan" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-md shadow-emerald-600/20 transition flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Simpan ke Sheet Input Laporan</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabel Data Sheet Input Laporan -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Data Sheet Input Laporan</h3>
+                            <p class="text-xs text-slate-500">Rekap hasil inspeksi mesin & status penyelesaian Nomor Notif</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input type="text" id="searchLaporan" onkeyup="renderLaporanTable()" placeholder="Cari ID, Part, PIC, Notif..."
+                                class="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600 outline-none">
+                            <!-- Tombol Export (Hanya tampil untuk Supervisor / Admin) -->
+                            <div id="laporanExportGroup" class="hidden flex items-center gap-2">
+                                <button type="button" id="btnExportExcel" onclick="exportLaporanExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Export Excel</span>
+                                </button>
+                                <button type="button" id="btnExportPdf" onclick="exportLaporanPDF()" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>Export PDF</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <th class="py-3.5 px-4 whitespace-nowrap">ID</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">PIC</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Tanggal Input</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Nama Part</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Image (DB)</th>
+                                    <th class="py-3.5 px-4 min-w-[230px]">Standar Cek</th>
+                                    <th class="py-3.5 px-4 min-w-[290px]">Metode Cek</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sebelum</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Foto Sesudah</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Abnormality?</th>
+                                    <th class="py-3.5 px-4 whitespace-nowrap">Nomor Notif</th>
+                                    <th class="py-3.5 px-4 text-center whitespace-nowrap">Status Notif</th>
+                                    <th class="py-3.5 px-4 min-w-[200px]">Keterangan</th>
+                                    <th class="py-3.5 px-4 min-w-[220px]">Catatan Perbaikan / Close</th>
+                                    <th id="thLaporanAksi" class="py-3.5 px-4 text-center whitespace-nowrap">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="laporanTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- VIEW 2: SHEET DATABASE                                                    -->
+            <!-- ========================================================================= -->
+            <div id="viewDatabase" class="hidden space-y-6">
+                <div id="dbReadOnlyBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 px-5 py-3.5 rounded-2xl text-xs flex items-center gap-2.5">
+                    <i class="fa-solid fa-lock text-amber-600 text-base"></i>
+                    <span>Anda masuk dengan role <strong id="dbRoleNotice">User</strong> (Mode Baca Saja). User hanya dapat melakukan input laporan dan tidak diizinkan mengubah/menghapus database maupun mengekspor data.</span>
+                </div>
+
+                <!-- Form Tambah / Edit Master Database (Hanya Supervisor / Admin) -->
+                <div id="dbFormCard" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-emerald-900 text-white px-6 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-database text-lime-400"></i>
+                            <h2 id="dbFormTitle" class="font-bold text-base">Tambah Data Master (Sheet Database)</h2>
+                        </div>
+                        <span class="text-xs bg-emerald-800 text-emerald-100 px-3 py-1 rounded-lg">Akses Khusus Supervisor</span>
+                    </div>
+
+                    <form id="databaseForm" class="p-6 space-y-4">
+                        <input type="hidden" id="dbOriginalId" value="">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">ID Part <span class="text-slate-400 font-normal">(Opsional / Auto)</span></label>
+                                <input type="text" id="dbPartIdInput" placeholder="Contoh: PART-001"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-emerald-600 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Part <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbNamaPart" required placeholder="Contoh: Motor Conveyor Utama"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Cek <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbMetodeCek" required placeholder="Contoh: Visual & Termometer IR"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Standar Cek <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbStandarCek" required placeholder="Contoh: Suhu < 60°C, Tidak Berisik"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">PIC <span class="text-rose-500">*</span></label>
+                                <input type="text" id="dbPic" required placeholder="Contoh: Budi Santoso"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/60 flex flex-col sm:flex-row items-center gap-4">
+                            <div class="w-28 h-24 bg-white border border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                                <img id="previewDbPart" src="" class="hidden w-full h-full object-cover cursor-pointer" onclick="openImagePreview(this.src, 'Preview Foto Part')">
+                                <span id="placeholderDbPart" class="text-[11px] text-slate-400 text-center px-2">Belum ada foto</span>
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Image (Foto Part Referensi)</label>
+                                <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition">
+                                    <i class="fa-solid fa-upload text-emerald-600"></i>
+                                    <span>Pilih / Ambil Foto Part</span>
+                                    <input type="file" id="inputDbFotoPart" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'previewDbPart', 'placeholderDbPart', 'dbPart')">
+                                </label>
+                                <p class="text-[11px] text-slate-500 mt-1">Foto akan diunggah otomatis ke folder Google Drive & disimpan di Sheet Database.</p>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-center">
+                                <button type="button" id="btnCancelDbEdit" onclick="resetDatabaseForm()" class="hidden px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold">
+                                    Batal Edit
+                                </button>
+                                <button type="submit" id="btnSubmitDb" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-plus"></i>
+                                    <span id="btnSaveDbText">Simpan ke Database</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabel Sheet Database -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">Data Sheet Database</h3>
+                            <p class="text-xs text-slate-500">Daftar master part, foto referensi, metode cek, standar cek, dan PIC</p>
+                        </div>
+                        <input type="text" id="searchDatabase" onkeyup="renderDatabaseTable()" placeholder="Cari Part, Metode, PIC..."
+                            class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600 outline-none">
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                                    <th class="py-3 px-4 w-12">No</th>
+                                    <th class="py-3 px-4">ID Part</th>
+                                    <th class="py-3 px-4">Nama Part</th>
+                                    <th class="py-3 px-4 text-center">Image (Foto Part)</th>
+                                    <th class="py-3 px-4">Metode Cek</th>
+                                    <th class="py-3 px-4">Standar Cek</th>
+                                    <th class="py-3 px-4">PIC</th>
+                                    <th id="thDatabaseAksi" class="py-3 px-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="databaseTableBody" class="divide-y divide-slate-200 text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. KONFIGURASI ENDPOINT API GOOGLE APPS SCRIPT & STATE GLOBAL
+        // =========================================================================
+        const DEFAULT_GAS_API_URL = "https://script.google.com/macros/s/PASTE_URL_WEB_APP_ANDA_DISINI/exec";
+        const STORAGE_API_KEY = "DAM_CHECKLIST_GAS_API_URL";
+
+        // Konfigurasi Kunci Trial / Lisensi
+        const TRIAL_LOCK_ENABLED = true; // Ubah menjadi false jika lisensi sudah lunas
+        const VALID_ACTIVATION_CODE = "CILT-PRO-2026"; // Kode buka kunci setelah pembayaran
+        const STORAGE_LICENSE_KEY = "CILT_APP_LICENSE_ACTIVE";
+
+        function checkTrialStatus() {
+            if (!TRIAL_LOCK_ENABLED) return;
+            const isActivated = localStorage.getItem(STORAGE_LICENSE_KEY) === "TRUE";
+            if (!isActivated) {
+                safeRemoveClass('trialExpiredModal', 'hidden');
+            }
+        }
+
+        function copyRekeningNumber() {
+            const rek = "7349728731";
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(rek).then(() => {
+                    const btn = document.getElementById('btnCopyRekening');
+                    if (btn) {
+                        btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> <span>Tersalin</span>`;
+                        setTimeout(() => {
+                            btn.innerHTML = `<i class="fa-regular fa-copy"></i> <span>Salin</span>`;
+                        }, 2000);
+                    }
+                }).catch(() => {});
+            }
+        }
+
+        function verifyTrialActivationCode() {
+            const inputEl = document.getElementById('trialActivationCodeInput');
+            const code = inputEl ? inputEl.value.trim().toUpperCase() : "";
+            if (code === VALID_ACTIVATION_CODE) {
+                localStorage.setItem(STORAGE_LICENSE_KEY, "TRUE");
+                safeAddClass('trialActivationError', 'hidden');
+                safeAddClass('trialExpiredModal', 'hidden');
+                showModal({
+                    title: "Aktivasi Berhasil",
+                    message: "Terima kasih! Pembayaran terkonfirmasi dan lisensi penuh aplikasi telah aktif.",
+                    type: "success"
+                });
+            } else {
+                safeRemoveClass('trialActivationError', 'hidden');
+            }
+        }
+
+        function getGasApiUrl() {
+            const saved = localStorage.getItem(STORAGE_API_KEY);
+            if (saved && saved.trim().startsWith("https://script.google.com/")) {
+                return saved.trim();
+            }
+            return DEFAULT_GAS_API_URL.trim();
+        }
+
+        function isApiUrlConfigured() {
+            const url = getGasApiUrl();
+            return url.startsWith("https://script.google.com/") && !url.includes("PASTE_URL_WEB_APP");
+        }
+
+        function toggleApiConfigPanel() {
+            const panel = document.getElementById('apiConfigPanel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+            updateApiConfigUI();
+        }
+
+        function updateApiConfigUI() {
+            const inputEl = document.getElementById('gasApiUrlInput');
+            const badgeEl = document.getElementById('apiStatusBadge');
+            const currentUrl = getGasApiUrl();
+            if (inputEl && !currentUrl.includes("PASTE_URL_WEB_APP")) {
+                inputEl.value = currentUrl;
+            }
+            if (badgeEl) {
+                if (isApiUrlConfigured()) {
+                    badgeEl.textContent = "Terhubung";
+                    badgeEl.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700";
+                } else {
+                    badgeEl.textContent = "Belum Diatur";
+                    badgeEl.className = "text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700";
+                }
+            }
+        }
+
+        function saveGasApiUrl() {
+            const inputEl = document.getElementById('gasApiUrlInput');
+            const val = inputEl ? inputEl.value.trim() : "";
+            if (!val.startsWith("https://script.google.com/")) {
+                showLoginError("URL Web App harus diawali https://script.google.com/...");
+                return;
+            }
+            localStorage.setItem(STORAGE_API_KEY, val);
+            safeAddClass('loginError', 'hidden');
+            updateApiConfigUI();
+            safeAddClass('apiConfigPanel', 'hidden');
+            showModal({
+                title: "Endpoint API Tersimpan",
+                message: "URL Google Apps Script berhasil disimpan di browser ini.",
+                type: "success"
+            });
+        }
+
+        let databaseSheet = [];
+        let laporanSheet = [];
+        let tempImages = { dbPart: "", sebelum: "", sesudah: "", closePerbaikan: "", editPerbaikan: "" };
+        let currentUser = null;
+        let sessionToken = null;
+        let chartInstances = { daily: null, pie: null, topParts: null, pic: null };
+
+        // =========================================================================
+        // 2. HELPER DOM AMAN & KONVERSI URL GAMBAR GOOGLE DRIVE
+        // =========================================================================
+        function safeAddClass(id, className) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add(className);
+        }
+
+        function safeRemoveClass(id, className) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove(className);
+        }
+
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
+        function safeSetValue(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        }
+
+        function resolveDriveImageUrl(url) {
+            if (!url) return "";
+            const str = String(url).trim();
+            if (str.startsWith("data:image")) return str;
+
+            const match = str.match(/\/d\/([a-zA-Z0-9_-]{25,})/) || str.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+            if (match && match[1]) {
+                return `https://lh3.googleusercontent.com/d/${match[1]}=w1600`;
+            }
+            return str;
+        }
+
+        function getDriveFallbackSvg(label) {
+            const text = escapeHtml(label || "No Image");
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="110" viewBox="0 0 160 110">
+                <rect width="160" height="110" fill="#e2e8f0" rx="8"/>
+                <text x="80" y="52" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#64748b" text-anchor="middle">Foto Tidak Tersedia</text>
+                <text x="80" y="70" font-family="Arial, sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">${text}</text>
+            </svg>`;
+            return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+        }
+
+        function isSupervisor() {
+            if (!currentUser || !currentUser.role) return false;
+            const r = String(currentUser.role).trim().toLowerCase();
+            return r === "supervisor" || r === "admin";
+        }
+
+        function canCloseNotif() {
+            if (!currentUser || !currentUser.role) return false;
+            const r = String(currentUser.role).trim().toLowerCase();
+            return r === "supervisor" || r === "admin" || r === "maintenance";
+        }
+
+        function applyRolePermissions() {
+            const sup = isSupervisor();
+            const roleName = currentUser && currentUser.role ? currentUser.role : "User";
+
+            const dbFormCard = document.getElementById('dbFormCard');
+            const dbBanner = document.getElementById('dbReadOnlyBanner');
+            const thDbAksi = document.getElementById('thDatabaseAksi');
+            if (dbFormCard) dbFormCard.classList.toggle('hidden', !sup);
+            if (dbBanner) dbBanner.classList.toggle('hidden', sup);
+            if (thDbAksi) thDbAksi.classList.toggle('hidden', !sup);
+            safeSetText('dbRoleNotice', roleName);
+
+            const exportGroup = document.getElementById('laporanExportGroup');
+            if (exportGroup) exportGroup.classList.toggle('hidden', !sup);
+
+            const showLapAksi = sup || canCloseNotif();
+            const thLapAksi = document.getElementById('thLaporanAksi');
+            if (thLapAksi) thLapAksi.classList.toggle('hidden', !showLapAksi);
+        }
+
+        // =========================================================================
+        // 3. KONEKSI FETCH API KE GOOGLE APPS SCRIPT (POST JSON)
+        // =========================================================================
+        async function callGasApi(actionName, token, payload = {}) {
+            const apiUrl = getGasApiUrl();
+            if (!apiUrl || !apiUrl.startsWith("https://script.google.com/") || apiUrl.includes("PASTE_URL_WEB_APP")) {
+                throw new Error("URL Web App Google Apps Script belum dikonfigurasi.");
+            }
+
+            let response;
+            try {
+                response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: actionName,
+                        token: token || "",
+                        payload: payload
+                    })
+                });
+            } catch (networkErr) {
+                throw new Error("Gagal terhubung ke server Google Apps Script. Periksa koneksi internet Anda.");
+            }
+
+            let json;
+            try {
+                json = await response.json();
+            } catch (parseErr) {
+                throw new Error("Respon server tidak valid. Pastikan deployment Apps Script diatur ke 'Anyone'.");
+            }
+
+            if (!json.ok) {
+                const errMsg = json.error || "Terjadi kesalahan pada server.";
+                if (errMsg.includes("Sesi") || errMsg.includes("login")) {
+                    forceSessionExpired(errMsg);
+                }
+                throw new Error(errMsg);
+            }
+
+            return json.data;
+        }
+
+        function forceSessionExpired(message) {
+            currentUser = null;
+            sessionToken = null;
+            safeAddClass('appSection', 'hidden');
+            safeRemoveClass('loginSection', 'hidden');
+            showModal({
+                title: "Sesi Berakhir",
+                message: message || "Sesi login Anda telah berakhir. Silakan masuk kembali.",
+                type: "warning"
+            });
+        }
+
+        function showLoginError(msg) {
+            safeSetText('loginErrorText', msg);
+            safeRemoveClass('loginError', 'hidden');
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('loginPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (!input || !icon) return;
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function handleLogout() {
+            showModal({
+                title: "Konfirmasi Keluar",
+                message: "Apakah Anda yakin ingin keluar dari sesi aplikasi?",
+                type: "warning",
+                confirmText: "Ya, Keluar",
+                onConfirm: () => {
+                    const tokenToRevoke = sessionToken;
+                    currentUser = null;
+                    sessionToken = null;
+                    const loginFormEl = document.getElementById('loginForm');
+                    if (loginFormEl) loginFormEl.reset();
+                    safeAddClass('appSection', 'hidden');
+                    safeRemoveClass('loginSection', 'hidden');
+
+                    if (tokenToRevoke) {
+                        callGasApi('logoutSession', tokenToRevoke, {}).catch(() => {});
+                    }
+                }
+            });
+        }
+
+        // =========================================================================
+        // 4. SINKRONISASI DATA & NAVIGASI TAB
+        // =========================================================================
+        async function loadDataFromServer() {
+            if (!sessionToken) return;
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+
+            try {
+                const res = await callGasApi('getAllAppData', sessionToken, {});
+                databaseSheet = (res && res.database) ? res.database : [];
+                laporanSheet = (res && res.laporan) ? res.laporan : [];
+                refreshAllUI();
+            } catch (err) {
+                console.error("Gagal sync data:", err);
+                showModal({
+                    title: "Gagal Sinkronisasi",
+                    message: "Gagal memuat data dari Google Sheets: " + (err.message || err),
+                    type: "danger"
+                });
+            } finally {
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function refreshAllUI() {
+            applyRolePermissions();
+            syncDropdownsFromDatabase();
+            renderDatabaseTable();
+            renderLaporanTable();
+            updateBadges();
+            const dashView = document.getElementById('viewDashboard');
+            if (dashView && !dashView.classList.contains('hidden')) {
+                renderDashboard();
+            }
+        }
+
+        function switchTab(tabName) {
+            const viewDashboard = document.getElementById('viewDashboard');
+            const viewLaporan = document.getElementById('viewLaporan');
+            const viewDatabase = document.getElementById('viewDatabase');
+
+            const btnDashboard = document.getElementById('tabBtnDashboard');
+            const btnLaporan = document.getElementById('tabBtnLaporan');
+            const btnDatabase = document.getElementById('tabBtnDatabase');
+
+            const activeClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition bg-emerald-600 text-white shadow-sm";
+            const inactiveClass = "tab-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition text-slate-600 hover:bg-emerald-100/60";
+
+            if (viewDashboard) viewDashboard.classList.add('hidden');
+            if (viewLaporan) viewLaporan.classList.add('hidden');
+            if (viewDatabase) viewDatabase.classList.add('hidden');
+
+            if (btnDashboard) btnDashboard.className = inactiveClass;
+            if (btnLaporan) btnLaporan.className = inactiveClass;
+            if (btnDatabase) btnDatabase.className = inactiveClass;
+
+            if (tabName === 'dashboard') {
+                if (viewDashboard) viewDashboard.classList.remove('hidden');
+                if (btnDashboard) btnDashboard.className = activeClass;
+                renderDashboard();
+            } else if (tabName === 'laporan') {
+                if (viewLaporan) viewLaporan.classList.remove('hidden');
+                if (btnLaporan) btnLaporan.className = activeClass;
+                syncDropdownsFromDatabase();
+            } else {
+                if (viewDatabase) viewDatabase.classList.remove('hidden');
+                if (btnDatabase) btnDatabase.className = activeClass;
+            }
+        }
+
+        function updateBadges() {
+            safeSetText('badgeLaporanCount', laporanSheet.length);
+            safeSetText('badgeDbCount', databaseSheet.length);
+        }
+
+        // =========================================================================
+        // 4B. LOGIKA CLOSING NOMOR NOTIF (SUPERVISOR / ADMIN / MAINTENANCE)
+        // =========================================================================
+        function openCloseNotifModal(laporanId) {
+            if (!canCloseNotif()) {
+                showModal({
+                    title: "Akses Ditolak",
+                    message: "Hanya Supervisor, Admin, atau tim Maintenance yang dapat menutup Nomor Notif.",
+                    type: "danger"
+                });
+                return;
+            }
+
+            const item = laporanSheet.find(l => l.id === laporanId);
+            if (!item) return;
+
+            safeSetValue('closeNotifLapId', item.id);
+            safeSetText('closeNotifNoDisplay', item.nomorEwo || "-");
+            safeSetText('closeNotifPartDisplay', item.namaPart || "-");
+            safeSetText('closeNotifKetAwalDisplay', item.keterangan && item.keterangan !== "-" ? item.keterangan : "Tidak ada catatan tambahan");
+            safeSetValue('closeNotifCatatan', "");
+
+            tempImages.closePerbaikan = "";
+            const previewEl = document.getElementById('previewClosePerbaikan');
+            if (previewEl) {
+                previewEl.src = "";
+                previewEl.classList.add('hidden');
+            }
+            safeRemoveClass('placeholderClosePerbaikan', 'hidden');
+
+            const inputEl = document.getElementById('inputFotoPerbaikan');
+            if (inputEl) inputEl.value = "";
+
+            safeRemoveClass('closeNotifModal', 'hidden');
+        }
+
+        function closeNotifModalDialog() {
+            safeAddClass('closeNotifModal', 'hidden');
+        }
+
+        // =========================================================================
+        // 4B-2. LOGIKA EDIT DATA INPUT LAPORAN (KETERANGAN & STATUS NOTIF)
+        // =========================================================================
+        function openEditLaporanModal(laporanId) {
+            if (!canCloseNotif()) {
+                showModal({
+                    title: "Akses Ditolak",
+                    message: "Hanya Supervisor, Admin, atau tim Maintenance yang dapat mengedit data laporan.",
+                    type: "danger"
+                });
+                return;
+            }
+
+            const item = laporanSheet.find(l => l.id === laporanId);
+            if (!item) return;
+
+            safeSetValue('editLapId', item.id);
+            safeSetText('editLapIdDisplay', item.id);
+            safeSetText('editLapPicDateDisplay', `${item.pic} • ${formatTanggalRingkas(item.tanggalInput)}`);
+            safeSetText('editLapPartDisplay', item.namaPart);
+
+            const isAbnormal = String(item.abnormality).toLowerCase() === "ya";
+            safeSetValue('editLapAbnormality', isAbnormal ? "Ya" : "Tidak");
+            safeSetValue('editLapNomorNotif', item.nomorEwo && item.nomorEwo !== "-" ? item.nomorEwo : "");
+            safeSetValue('editLapKeterangan', item.keterangan && item.keterangan !== "-" ? item.keterangan : "");
+
+            const stNotif = String(item.statusNotif || "").toLowerCase() === "closed" ? "Closed" : "Open";
+            safeSetValue('editLapStatusNotif', stNotif);
+            safeSetValue('editLapCatatanClose', item.catatanClose && item.catatanClose !== "-" ? item.catatanClose : "");
+
+            tempImages.editPerbaikan = "";
+            const previewEl = document.getElementById('previewEditPerbaikan');
+            if (previewEl && item.fotoPerbaikan) {
+                previewEl.src = resolveDriveImageUrl(item.fotoPerbaikan);
+                previewEl.classList.remove('hidden');
+                safeAddClass('placeholderEditPerbaikan', 'hidden');
+            } else {
+                if (previewEl) {
+                    previewEl.src = "";
+                    previewEl.classList.add('hidden');
+                }
+                safeRemoveClass('placeholderEditPerbaikan', 'hidden');
+            }
+
+            const inputEl = document.getElementById('inputEditFotoPerbaikan');
+            if (inputEl) inputEl.value = "";
+
+            onEditAbnormalityChange();
+            safeRemoveClass('editLaporanModal', 'hidden');
+        }
+
+        function closeEditLaporanModal() {
+            safeAddClass('editLaporanModal', 'hidden');
+        }
+
+        function onEditAbnormalityChange() {
+            const abnEl = document.getElementById('editLapAbnormality');
+            const notifInput = document.getElementById('editLapNomorNotif');
+            const notifSection = document.getElementById('editNotifSection');
+            const isAbn = abnEl && abnEl.value === "Ya";
+
+            if (notifInput) {
+                notifInput.disabled = !isAbn;
+                if (!isAbn) notifInput.value = "";
+            }
+            if (notifSection) {
+                if (isAbn) {
+                    notifSection.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    notifSection.classList.add('opacity-50', 'pointer-events-none');
+                }
+            }
+        }
+
+        function renderNotifStatusBadge(item) {
+            const isAbnormal = String(item.abnormality).toLowerCase() === "ya";
+            if (!isAbnormal) {
+                return `<span class="text-slate-400 font-medium">-</span>`;
+            }
+            const status = String(item.statusNotif || "Open").trim().toLowerCase();
+            if (status === "closed") {
+                return `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-circle-check"></i> CLOSED</span>`;
+            }
+            return `<span class="inline-flex items-center gap-1 bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-clock"></i> OPEN</span>`;
+        }
+
+        // =========================================================================
+        // 5. DASHBOARD MONITORING & CHART.JS
+        // =========================================================================
+        function parseLaporanDate(dateStr) {
+            if (!dateStr) return null;
+            const normalized = String(dateStr).trim().replace(' ', 'T');
+            const d = new Date(normalized);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function renderDashboard() {
+            const picFilterEl = document.getElementById('dashPicFilter');
+            const periodFilterEl = document.getElementById('dashPeriodFilter');
+            const notifStatusFilterEl = document.getElementById('dashNotifStatusFilter');
+
+            const selectedPic = picFilterEl ? picFilterEl.value : "ALL";
+            const selectedPeriod = periodFilterEl ? periodFilterEl.value : "ALL";
+            const selectedNotifStatus = notifStatusFilterEl ? notifStatusFilterEl.value : "ALL";
+
+            if (picFilterEl) {
+                const pics = [...new Set([
+                    ...databaseSheet.map(d => d.pic),
+                    ...laporanSheet.map(l => l.pic)
+                ].filter(Boolean))];
+                picFilterEl.innerHTML = `<option value="ALL">Semua PIC</option>` +
+                    pics.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+                if (pics.includes(selectedPic)) picFilterEl.value = selectedPic;
+            }
+
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const filteredLaporan = laporanSheet.filter(item => {
+                if (selectedPic !== "ALL" && item.pic !== selectedPic) return false;
+                if (selectedPeriod === "ALL") return true;
+
+                const d = parseLaporanDate(item.tanggalInput);
+                if (!d) return false;
+
+                if (selectedPeriod === "TODAY") {
+                    return d >= startOfToday;
+                } else if (selectedPeriod === "7D") {
+                    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return d >= sevenDaysAgo;
+                } else if (selectedPeriod === "30D") {
+                    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    return d >= thirtyDaysAgo;
+                } else if (selectedPeriod === "MONTH") {
+                    return d >= startOfMonth;
+                }
+                return true;
+            });
+
+            const totalInspeksi = filteredLaporan.length;
+            const totalNormal = filteredLaporan.filter(l => String(l.abnormality).toLowerCase() !== "ya").length;
+            const abnormalItems = filteredLaporan.filter(l => String(l.abnormality).toLowerCase() === "ya");
+            const totalAbnormal = abnormalItems.length;
+            const totalOpenNotif = abnormalItems.filter(l => String(l.statusNotif || "Open").toLowerCase() !== "closed").length;
+            const totalClosedNotif = abnormalItems.filter(l => String(l.statusNotif || "").toLowerCase() === "closed").length;
+
+            const relevantDbParts = selectedPic === "ALL"
+                ? databaseSheet
+                : databaseSheet.filter(d => d.pic === selectedPic);
+            const totalMasterParts = relevantDbParts.length;
+            const checkedUniqueParts = new Set(filteredLaporan.map(l => l.namaPart)).size;
+
+            const completionRate = totalMasterParts > 0
+                ? Math.min(100, Math.round((checkedUniqueParts / totalMasterParts) * 100))
+                : (totalInspeksi > 0 ? 100 : 0);
+
+            const normalRate = totalInspeksi > 0
+                ? Math.round((totalNormal / totalInspeksi) * 100)
+                : 0;
+
+            safeSetText('kpiTotalInspeksi', totalInspeksi);
+            safeSetText('kpiSubInspeksi', `${checkedUniqueParts} part unik diperiksa`);
+            safeSetText('kpiCompletionRate', `${completionRate}%`);
+            safeSetText('kpiSubCompletion', `${checkedUniqueParts} dari ${totalMasterParts} part database`);
+            safeSetText('kpiNormalRate', `${normalRate}%`);
+            safeSetText('kpiSubNormal', `${totalNormal} dari ${totalInspeksi} cek normal`);
+            safeSetText('kpiTotalAbnormal', totalAbnormal);
+            safeSetText('kpiSubAbnormal', `${totalOpenNotif} Open | ${totalClosedNotif} Closed`);
+
+            const displayNotifItems = abnormalItems.filter(item => {
+                if (selectedNotifStatus === "ALL") return true;
+                const st = String(item.statusNotif || "Open").toLowerCase();
+                return selectedNotifStatus.toLowerCase() === st;
+            });
+
+            safeSetText('dashEwoCountBadge', `${displayNotifItems.length} Notif`);
+            const canClose = canCloseNotif();
+            const thDashNotifAksi = document.getElementById('thDashNotifAksi');
+            if (thDashNotifAksi) thDashNotifAksi.classList.toggle('hidden', !canClose);
+
+            const abnTbody = document.getElementById('dashAbnormalTableBody');
+            if (abnTbody) {
+                const colSpanDash = canClose ? 10 : 9;
+                if (displayNotifItems.length === 0) {
+                    abnTbody.innerHTML = `<tr><td colspan="${colSpanDash}" class="py-8 text-center text-slate-400">Tidak ada data Abnormality / Nomor Notif pada filter ini.</td></tr>`;
+                } else {
+                    abnTbody.innerHTML = displayNotifItems.map(item => {
+                        const sebelumUrl = resolveDriveImageUrl(item.fotoSebelum);
+                        const perbaikanUrl = resolveDriveImageUrl(item.fotoPerbaikan);
+                        const isClosed = String(item.statusNotif || "").toLowerCase() === "closed";
+
+                        return `
+                            <tr class="hover:bg-rose-50/40 transition">
+                                <td class="py-3 px-4 font-mono font-bold text-rose-600 whitespace-nowrap">${escapeHtml(item.nomorEwo)}</td>
+                                <td class="py-3 px-4 text-center whitespace-nowrap">${renderNotifStatusBadge(item)}</td>
+                                <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formatTanggalRingkas(item.tanggalInput))}</td>
+                                <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
+                                <td class="py-3 px-4 font-medium text-slate-700 whitespace-nowrap">${escapeHtml(item.pic)}</td>
+                                <td class="py-3 px-4 text-slate-700 leading-relaxed min-w-[200px]">${escapeHtml(item.keterangan || "-")}</td>
+                                <td class="py-3 px-4 text-slate-700 leading-relaxed min-w-[220px]">${escapeHtml(item.catatanClose || "-")}</td>
+                                <td class="py-3 px-4 text-center">
+                                    ${sebelumUrl ? `<img src="${sebelumUrl}" onerror="this.onerror=null;this.src='${getDriveFallbackSvg('Sebelum')}';" onclick="openImagePreview(this.src, 'Abnormality: ${escapeHtml(item.namaPart)}')" class="w-11 h-9 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">` : '<span class="text-slate-400">-</span>'}
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    ${perbaikanUrl ? `<img src="${perbaikanUrl}" onerror="this.onerror=null;this.src='${getDriveFallbackSvg('Perbaikan')}';" onclick="openImagePreview(this.src, 'Hasil Perbaikan: ${escapeHtml(item.namaPart)}')" class="w-11 h-9 object-cover rounded-lg border border-emerald-300 mx-auto cursor-pointer hover:scale-105 transition">` : '<span class="text-slate-400">-</span>'}
+                                </td>
+                                ${canClose ? `
+                                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                                        ${!isClosed
+                                            ? `<button type="button" onclick="openCloseNotifModal('${item.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold shadow-xs transition inline-flex items-center gap-1">
+                                                <i class="fa-solid fa-check"></i> Close Notif
+                                               </button>`
+                                            : `<span class="text-[11px] font-semibold text-emerald-700"><i class="fa-solid fa-check-double"></i> Selesai</span>`
+                                        }
+                                    </td>
+                                ` : ``}
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            if (typeof Chart === 'undefined') return;
+
+            const dailyMap = {};
+            filteredLaporan.forEach(item => {
+                const dayKey = String(item.tanggalInput || "").slice(0, 10) || "Tanpa Tanggal";
+                if (!dailyMap[dayKey]) dailyMap[dayKey] = { normal: 0, abnormal: 0 };
+                if (String(item.abnormality).toLowerCase() === "ya") {
+                    dailyMap[dayKey].abnormal++;
+                } else {
+                    dailyMap[dayKey].normal++;
+                }
+            });
+            const sortedDays = Object.keys(dailyMap).sort();
+
+            const ctxDaily = document.getElementById('chartDailyTrend');
+            if (ctxDaily) {
+                if (chartInstances.daily) chartInstances.daily.destroy();
+                chartInstances.daily = new Chart(ctxDaily, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedDays.length ? sortedDays : ['Belum ada data'],
+                        datasets: [
+                            {
+                                label: 'Normal',
+                                data: sortedDays.length ? sortedDays.map(d => dailyMap[d].normal) : [0],
+                                backgroundColor: '#008B45',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Abnormality',
+                                data: sortedDays.length ? sortedDays.map(d => dailyMap[d].abnormal) : [0],
+                                backgroundColor: '#f59e0b',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+                        },
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            const ctxPie = document.getElementById('chartStatusPie');
+            if (ctxPie) {
+                if (chartInstances.pie) chartInstances.pie.destroy();
+                chartInstances.pie = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Normal (Tidak)', 'Abnormality (Ya)'],
+                        datasets: [{
+                            data: (totalNormal === 0 && totalAbnormal === 0) ? [1, 0] : [totalNormal, totalAbnormal],
+                            backgroundColor: (totalNormal === 0 && totalAbnormal === 0) ? ['#e2e8f0', '#f59e0b'] : ['#008B45', '#f59e0b'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '68%',
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            const partAbnCount = {};
+            abnormalItems.forEach(item => {
+                partAbnCount[item.namaPart] = (partAbnCount[item.namaPart] || 0) + 1;
+            });
+            const topParts = Object.entries(partAbnCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const ctxTopParts = document.getElementById('chartTopAbnormalParts');
+            if (ctxTopParts) {
+                if (chartInstances.topParts) chartInstances.topParts.destroy();
+                chartInstances.topParts = new Chart(ctxTopParts, {
+                    type: 'bar',
+                    data: {
+                        labels: topParts.length ? topParts.map(p => p[0]) : ['Tidak ada abnormality'],
+                        datasets: [{
+                            label: 'Jumlah Temuan Abnormality',
+                            data: topParts.length ? topParts.map(p => p[1]) : [0],
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            const picCountMap = {};
+            filteredLaporan.forEach(item => {
+                const p = item.pic || "Tanpa PIC";
+                picCountMap[p] = (picCountMap[p] || 0) + 1;
+            });
+            const picEntries = Object.entries(picCountMap).sort((a, b) => b[1] - a[1]);
+
+            const ctxPic = document.getElementById('chartPicPerformance');
+            if (ctxPic) {
+                if (chartInstances.pic) chartInstances.pic.destroy();
+                chartInstances.pic = new Chart(ctxPic, {
+                    type: 'bar',
+                    data: {
+                        labels: picEntries.length ? picEntries.map(p => p[0]) : ['Belum ada data'],
+                        datasets: [{
+                            label: 'Jumlah Checklist Selesai',
+                            data: picEntries.length ? picEntries.map(p => p[1]) : [0],
+                            backgroundColor: '#65a30d',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        // =========================================================================
+        // 6. LOGIKA UPLOAD & KOMPRESI GAMBAR
+        // =========================================================================
+        function handleImageUpload(inputElement, previewImgId, placeholderId, targetKey) {
+            const file = inputElement.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 700;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+                    tempImages[targetKey] = compressedDataUrl;
+
+                    const previewEl = document.getElementById(previewImgId);
+                    if (previewEl) {
+                        previewEl.src = compressedDataUrl;
+                        previewEl.classList.remove('hidden');
+                    }
+                    safeAddClass(placeholderId, 'hidden');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // =========================================================================
+        // 7. LOGIKA SHEET DATABASE (CRUD - KHUSUS SUPERVISOR)
+        // =========================================================================
+        function editDatabaseItem(id) {
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "Hanya Supervisor yang dapat mengedit data.", type: "danger" });
+                return;
+            }
+            const item = databaseSheet.find(d => d.id === id);
+            if (!item) return;
+
+            safeSetValue('dbOriginalId', item.id);
+            safeSetValue('dbPartIdInput', item.id);
+            safeSetValue('dbNamaPart', item.namaPart);
+            safeSetValue('dbMetodeCek', item.metodeCek);
+            safeSetValue('dbStandarCek', item.standarCek);
+            safeSetValue('dbPic', item.pic);
+
+            tempImages.dbPart = item.image;
+            const previewEl = document.getElementById('previewDbPart');
+            if (item.image && previewEl) {
+                previewEl.src = resolveDriveImageUrl(item.image);
+                previewEl.classList.remove('hidden');
+                safeAddClass('placeholderDbPart', 'hidden');
+            } else {
+                if (previewEl) previewEl.classList.add('hidden');
+                safeRemoveClass('placeholderDbPart', 'hidden');
+            }
+
+            safeSetText('dbFormTitle', `Edit Data Part (${item.namaPart})`);
+            safeSetText('btnSaveDbText', "Update Database");
+            safeRemoveClass('btnCancelDbEdit', 'hidden');
+
+            const dbFormEl = document.getElementById('databaseForm');
+            if (dbFormEl) dbFormEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function deleteDatabaseItem(id) {
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "Hanya Supervisor yang dapat menghapus data.", type: "danger" });
+                return;
+            }
+            const item = databaseSheet.find(d => d.id === id);
+            if (!item) return;
+
+            showModal({
+                title: "Hapus Data Database?",
+                message: `Anda yakin ingin menghapus part "${item.namaPart}" dari Google Sheets?`,
+                type: "danger",
+                confirmText: "Ya, Hapus",
+                onConfirm: async () => {
+                    try {
+                        await callGasApi('deleteDatabaseRecord', sessionToken, { id });
+                        await loadDataFromServer();
+                    } catch (err) {
+                        showModal({ title: "Gagal Menghapus", message: err.message || String(err), type: "danger" });
+                    }
+                }
+            });
+        }
+
+        function resetDatabaseForm() {
+            const dbFormEl = document.getElementById('databaseForm');
+            if (dbFormEl) dbFormEl.reset();
+            safeSetValue('dbOriginalId', "");
+            safeSetValue('dbPartIdInput', "");
+            tempImages.dbPart = "";
+
+            const previewEl = document.getElementById('previewDbPart');
+            if (previewEl) {
+                previewEl.src = "";
+                previewEl.classList.add('hidden');
+            }
+            safeRemoveClass('placeholderDbPart', 'hidden');
+
+            safeSetText('dbFormTitle', "Tambah Data Master (Sheet Database)");
+            safeSetText('btnSaveDbText', "Simpan ke Database");
+            safeAddClass('btnCancelDbEdit', 'hidden');
+        }
+
+        function renderDatabaseTable() {
+            const tbody = document.getElementById('databaseTableBody');
+            if (!tbody) return;
+
+            const searchEl = document.getElementById('searchDatabase');
+            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+            const sup = isSupervisor();
+            const colSpanCount = sup ? 8 : 7;
+
+            const filtered = databaseSheet.filter(item =>
+                String(item.id).toLowerCase().includes(keyword) ||
+                String(item.namaPart).toLowerCase().includes(keyword) ||
+                String(item.metodeCek).toLowerCase().includes(keyword) ||
+                String(item.standarCek).toLowerCase().includes(keyword) ||
+                String(item.pic).toLowerCase().includes(keyword)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="py-8 text-center text-slate-400">Tidak ada data di Sheet Database.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((item, idx) => {
+                const imgUrl = resolveDriveImageUrl(item.image);
+                const imgHtml = imgUrl
+                    ? `<img src="${imgUrl}" alt="${escapeHtml(item.namaPart)}"
+                        onerror="this.onerror=null;this.src='${getDriveFallbackSvg(item.namaPart)}';"
+                        onclick="openImagePreview(this.src, '${escapeHtml(item.namaPart)}')"
+                        class="w-14 h-12 object-cover rounded-lg border border-slate-200 mx-auto cursor-pointer hover:scale-105 transition shadow-xs">`
+                    : `<span class="text-[11px] text-slate-400 italic">Tidak ada foto</span>`;
+
+                const aksiHtml = sup
+                    ? `<td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button type="button" onclick="editDatabaseItem('${item.id}')" title="Edit" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button type="button" onclick="deleteDatabaseItem('${item.id}')" title="Hapus" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>`
+                    : ``;
+
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4 font-semibold text-slate-500">${idx + 1}</td>
+                        <td class="py-3 px-4 font-mono font-bold text-emerald-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
+                        <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(item.namaPart)}</td>
+                        <td class="py-3 px-4 text-center">${imgHtml}</td>
+                        <td class="py-3 px-4 text-slate-700">${escapeHtml(item.metodeCek)}</td>
+                        <td class="py-3 px-4 text-slate-700">${escapeHtml(item.standarCek)}</td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg font-medium">
+                                <i class="fa-solid fa-user text-[10px]"></i> ${escapeHtml(item.pic)}
+                            </span>
+                        </td>
+                        ${aksiHtml}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 8. LOGIKA SHEET INPUT LAPORAN (FILTER PART BY PIC)
+        // =========================================================================
+        function syncDropdownsFromDatabase() {
+            const picSelect = document.getElementById('lapPic');
+            if (!picSelect) return;
+
+            const currentPicVal = picSelect.value;
+
+            const uniquePics = [...new Set(databaseSheet.map(item => String(item.pic || "").trim()).filter(Boolean))];
+            picSelect.innerHTML = `<option value="">-- Pilih PIC (Dari Database) --</option>` + 
+                uniquePics.map(pic => `<option value="${escapeHtml(pic)}">${escapeHtml(pic)}</option>`).join('');
+
+            if (uniquePics.includes(currentPicVal)) {
+                picSelect.value = currentPicVal;
+            }
+            populatePartsByPic(picSelect.value, true);
+        }
+
+        function onPicSelected() {
+            const picSelect = document.getElementById('lapPic');
+            const selectedPic = picSelect ? picSelect.value : "";
+            populatePartsByPic(selectedPic, false);
+        }
+
+        function populatePartsByPic(selectedPic, preserveSelection = false) {
+            const partSelect = document.getElementById('lapNamaPart');
+            const helperText = document.getElementById('lapPartHelperText');
+            if (!partSelect) return;
+
+            const previousPartId = preserveSelection ? partSelect.value : "";
+            const cleanPic = String(selectedPic || "").trim().toLowerCase();
+
+            if (!cleanPic) {
+                partSelect.innerHTML = `<option value="">-- Pilih PIC Terlebih Dahulu --</option>`;
+                if (helperText) helperText.textContent = "Pilih PIC terlebih dahulu untuk menampilkan daftar part yang sesuai.";
+                onPartSelected();
+                return;
+            }
+
+            const filteredParts = databaseSheet.filter(item =>
+                String(item.pic || "").trim().toLowerCase() === cleanPic
+            );
+
+            if (filteredParts.length === 0) {
+                partSelect.innerHTML = `<option value="">-- Tidak ada part untuk PIC ini --</option>`;
+                if (helperText) helperText.textContent = `Tidak ditemukan part untuk PIC "${selectedPic}" di Sheet Database.`;
+                onPartSelected();
+                return;
+            }
+
+            partSelect.innerHTML = `<option value="">-- Pilih Nama Part (${filteredParts.length} Part) --</option>` +
+                filteredParts.map(item => `<option value="${item.id}">${escapeHtml(item.namaPart)}</option>`).join('');
+
+            if (helperText) {
+                helperText.textContent = `Menampilkan ${filteredParts.length} part khusus untuk PIC ${selectedPic}.`;
+            }
+
+            if (previousPartId && filteredParts.some(d => d.id === previousPartId)) {
+                partSelect.value = previousPartId;
+            }
+            onPartSelected();
+        }
+
+        function onPartSelected() {
+            const partSelect = document.getElementById('lapNamaPart');
+            const selectedId = partSelect ? partSelect.value : "";
+            const partData = databaseSheet.find(item => item.id === selectedId);
+
+            const imgPreview = document.getElementById('lapDbImagePreview');
+
+            if (partData) {
+                safeSetValue('lapStandarCek', partData.standarCek);
+                safeSetValue('lapMetodeCek', partData.metodeCek);
+
+                const imgUrl = resolveDriveImageUrl(partData.image);
+                if (imgUrl && imgPreview) {
+                    imgPreview.onerror = function() {
+                        this.onerror = null;
+                        this.src = getDriveFallbackSvg(partData.namaPart);
+                    };
+                    imgPreview.src = imgUrl;
+                    imgPreview.classList.remove('hidden');
+                    safeAddClass('lapDbImagePlaceholder', 'hidden');
+                } else {
+                    if (imgPreview) imgPreview.classList.add('hidden');
+                    safeRemoveClass('lapDbImagePlaceholder', 'hidden');
+                }
+
+                const picSelect = document.getElementById('lapPic');
+                if (picSelect && !picSelect.value && partData.pic) {
+                    picSelect.value = partData.pic;
+                }
+            } else {
+                safeSetValue('lapStandarCek', "");
+                safeSetValue('lapMetodeCek', "");
+                if (imgPreview) {
+                    imgPreview.src = "";
+                    imgPreview.classList.add('hidden');
+                }
+                safeRemoveClass('lapDbImagePlaceholder', 'hidden');
+            }
+        }
+
+        function toggleEwoField() {
+            const checkedRadio = document.querySelector('input[name="abnormalityStatus"]:checked');
+            const status = checkedRadio ? checkedRadio.value : "Tidak";
+            const ewoContainer = document.getElementById('ewoContainer');
+            const ewoInput = document.getElementById('lapNomorEwo');
+
+            if (status === "Ya") {
+                if (ewoContainer) ewoContainer.classList.remove('opacity-50', 'pointer-events-none');
+                if (ewoInput) {
+                    ewoInput.disabled = false;
+                    ewoInput.required = true;
+                    ewoInput.focus();
+                }
+                safeRemoveClass('ewoRequiredStar', 'hidden');
+            } else {
+                if (ewoContainer) ewoContainer.classList.add('opacity-50', 'pointer-events-none');
+                if (ewoInput) {
+                    ewoInput.disabled = true;
+                    ewoInput.required = false;
+                    ewoInput.value = "";
+                }
+                safeAddClass('ewoRequiredStar', 'hidden');
+            }
+        }
+
+        function generateNextLaporanId() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const rand = String(Math.floor(100 + Math.random() * 900));
+            return `LAP-${yyyy}${mm}${dd}-${rand}`;
+        }
+
+        function setCurrentDateTimeLocal() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            safeSetValue('lapTanggal', now.toISOString().slice(0, 16));
+        }
+
+        function resetLaporanForm() {
+            const lapFormEl = document.getElementById('laporanForm');
+            if (lapFormEl) lapFormEl.reset();
+            safeSetValue('lapId', generateNextLaporanId());
+            setCurrentDateTimeLocal();
+
+            populatePartsByPic("", false);
+
+            tempImages.sebelum = "";
+            tempImages.sesudah = "";
+            safeAddClass('previewSebelum', 'hidden');
+            safeRemoveClass('placeholderSebelum', 'hidden');
+            safeAddClass('previewSesudah', 'hidden');
+            safeRemoveClass('placeholderSesudah', 'hidden');
+
+            toggleEwoField();
+        }
+
+        function deleteLaporanItem(id) {
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "Hanya Supervisor yang dapat menghapus laporan.", type: "danger" });
+                return;
+            }
+            showModal({
+                title: "Hapus Data Laporan?",
+                message: `Anda yakin ingin menghapus laporan dengan ID ${id} dari Google Sheets?`,
+                type: "danger",
+                confirmText: "Ya, Hapus",
+                onConfirm: async () => {
+                    try {
+                        await callGasApi('deleteLaporanRecord', sessionToken, { id });
+                        await loadDataFromServer();
+                    } catch (err) {
+                        showModal({ title: "Gagal Menghapus", message: err.message || String(err), type: "danger" });
+                    }
+                }
+            });
+        }
+
+        function formatTanggalRingkas(raw) {
+            if (!raw) return "-";
+            const str = String(raw).trim();
+            const isoMatch = str.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+            if (isoMatch) {
+                return `${isoMatch[1]} ${isoMatch[2]}`;
+            }
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const yyyy = parsed.getFullYear();
+                const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const dd = String(parsed.getDate()).padStart(2, '0');
+                const hh = String(parsed.getHours()).padStart(2, '0');
+                const min = String(parsed.getMinutes()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+            }
+            return str;
+        }
+
+        function renderLaporanTable() {
+            const tbody = document.getElementById('laporanTableBody');
+            if (!tbody) return;
+
+            const searchEl = document.getElementById('searchLaporan');
+            const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+            const canDelete = isSupervisor();
+            const canClose = canCloseNotif();
+            const showAksiCol = canDelete || canClose;
+            const colSpanCount = showAksiCol ? 15 : 14;
+
+            const filtered = laporanSheet.filter(item =>
+                String(item.id).toLowerCase().includes(keyword) ||
+                String(item.pic).toLowerCase().includes(keyword) ||
+                String(item.namaPart).toLowerCase().includes(keyword) ||
+                String(item.nomorEwo).toLowerCase().includes(keyword) ||
+                String(item.keterangan || "").toLowerCase().includes(keyword) ||
+                String(item.statusNotif || "").toLowerCase().includes(keyword)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colSpanCount}" class="py-8 text-center text-slate-400">Belum ada data laporan di Google Sheets.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const formattedDate = formatTanggalRingkas(item.tanggalInput);
+                const isAbnormal = String(item.abnormality).toLowerCase() === "ya";
+                const isClosed = String(item.statusNotif || "").toLowerCase() === "closed";
+
+                const dbImgUrl = resolveDriveImageUrl(item.imageDb);
+                const sebelumUrl = resolveDriveImageUrl(item.fotoSebelum);
+                const sesudahUrl = resolveDriveImageUrl(item.fotoSesudah);
+
+                const dbImgHtml = dbImgUrl
+                    ? `<img src="${dbImgUrl}" onerror="this.onerror=null;this.src='${getDriveFallbackSvg('DB')}';" onclick="openImagePreview(this.src, 'Referensi DB: ${escapeHtml(item.namaPart)}')" class="w-12 h-10 object-cover rounded-lg border border-slate-200 mx-auto cursor-pointer hover:scale-105 transition">`
+                    : `<span class="text-slate-400">-</span>`;
+
+                const sebelumHtml = sebelumUrl
+                    ? `<img src="${sebelumUrl}" onerror="this.onerror=null;this.src='${getDriveFallbackSvg('Sebelum')}';" onclick="openImagePreview(this.src, 'Foto Sebelum Cek (${escapeHtml(item.id)})')" class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                    : `<span class="text-slate-400">-</span>`;
+
+                const sesudahHtml = sesudahUrl
+                    ? `<img src="${sesudahUrl}" onerror="this.onerror=null;this.src='${getDriveFallbackSvg('Sesudah')}';" onclick="openImagePreview(this.src, 'Foto Sesudah Cek (${escapeHtml(item.id)})')" class="w-12 h-10 object-cover rounded-lg border border-slate-300 mx-auto cursor-pointer hover:scale-105 transition">`
+                    : `<span class="text-slate-400">-</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 transition align-top">
+                        <td class="py-3.5 px-4 font-mono font-bold text-emerald-700 whitespace-nowrap">${escapeHtml(item.id)}</td>
+                        <td class="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">${escapeHtml(item.pic)}</td>
+                        <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">${escapeHtml(formattedDate)}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(item.namaPart)}</td>
+                        <td class="py-3.5 px-4 text-center">${dbImgHtml}</td>
+                        <td class="py-3.5 px-4 text-slate-700 leading-relaxed min-w-[230px] max-w-[300px] whitespace-normal break-words">
+                            ${escapeHtml(item.standarCek || '-')}
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-700 leading-relaxed min-w-[290px] max-w-[380px] whitespace-normal break-words">
+                            ${escapeHtml(item.metodeCek || '-')}
+                        </td>
+                        <td class="py-3.5 px-4 text-center">${sebelumHtml}</td>
+                        <td class="py-3.5 px-4 text-center">${sesudahHtml}</td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            ${isAbnormal 
+                                ? `<span class="inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-triangle-exclamation"></i> Ya</span>`
+                                : `<span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold text-[11px]"><i class="fa-solid fa-check"></i> Tidak</span>`
+                            }
+                        </td>
+                        <td class="py-3.5 px-4 font-mono font-semibold whitespace-nowrap ${isAbnormal ? 'text-rose-600' : 'text-slate-400'}">
+                            ${escapeHtml(item.nomorEwo)}
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            ${renderNotifStatusBadge(item)}
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-700 leading-relaxed min-w-[200px] max-w-[280px] whitespace-normal break-words">
+                            ${escapeHtml(item.keterangan || '-')}
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-700 leading-relaxed min-w-[220px] max-w-[300px] whitespace-normal break-words">
+                            ${escapeHtml(item.catatanClose || '-')}
+                        </td>
+                        ${showAksiCol ? `
+                            <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    ${canClose ? `
+                                        <button type="button" onclick="openEditLaporanModal('${item.id}')" title="Edit Keterangan / Status Notif" class="p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    ` : ''}
+                                    ${(canClose && isAbnormal && !isClosed) ? `
+                                        <button type="button" onclick="openCloseNotifModal('${item.id}')" title="Close Nomor Notif" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold transition inline-flex items-center gap-1">
+                                            <i class="fa-solid fa-check"></i> Close
+                                        </button>
+                                    ` : ''}
+                                    ${canDelete ? `
+                                        <button type="button" onclick="deleteLaporanItem('${item.id}')" title="Hapus Laporan" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </td>
+                        ` : ``}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 9. EXPORT LAPORAN KE EXCEL (.XLSX) & PDF (KHUSUS SUPERVISOR / ADMIN)
+        // =========================================================================
+        function exportLaporanExcel() {
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "User tidak diizinkan mengekspor data ke Excel.", type: "danger" });
+                return;
+            }
+            if (laporanSheet.length === 0) {
+                showModal({ title: "Data Kosong", message: "Tidak ada data laporan untuk diekspor.", type: "warning" });
+                return;
+            }
+
+            if (typeof XLSX === 'undefined') {
+                showModal({ title: "Library Belum Siap", message: "Library Excel (SheetJS) gagal dimuat. Periksa koneksi internet Anda.", type: "danger" });
+                return;
+            }
+
+            const tglCetak = new Date().toLocaleString('id-ID');
+            const totalAbnormal = laporanSheet.filter(i => String(i.abnormality).toLowerCase() === 'ya').length;
+            const totalNormal = laporanSheet.length - totalAbnormal;
+
+            const wsData = [
+                ["LAPORAN HASIL CHECKLIST & INSPEKSI MESIN (CILT EXECUTION - PT. HERLINA INDAH)"],
+                [`Dicetak pada: ${tglCetak} | Total Inspeksi: ${laporanSheet.length} | Normal: ${totalNormal} | Abnormality: ${totalAbnormal}`],
+                [],
+                [
+                    "No", "ID Laporan", "PIC", "Tanggal Input", "Nama Part",
+                    "Standar Cek", "Metode Cek", "Status Abnormality", "Nomor Notif", "Status Notif", "Keterangan", "Catatan Perbaikan / Close",
+                    "Link Foto Sebelum", "Link Foto Sesudah", "Link Foto Perbaikan"
+                ]
+            ];
+
+            laporanSheet.forEach((item, idx) => {
+                wsData.push([
+                    idx + 1,
+                    item.id,
+                    item.pic,
+                    formatTanggalRingkas(item.tanggalInput),
+                    item.namaPart,
+                    item.standarCek || "-",
+                    item.metodeCek || "-",
+                    item.abnormality,
+                    item.nomorEwo || "-",
+                    item.statusNotif || "-",
+                    item.keterangan || "-",
+                    item.catatanClose || "-",
+                    item.fotoSebelum || "-",
+                    item.fotoSesudah || "-",
+                    item.fotoPerbaikan || "-"
+                ]);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+            ws['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 14 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 14 } }
+            ];
+
+            ws['!cols'] = [
+                { wch: 5 },  // No
+                { wch: 20 }, // ID
+                { wch: 18 }, // PIC
+                { wch: 18 }, // Tanggal
+                { wch: 26 }, // Nama Part
+                { wch: 36 }, // Standar Cek
+                { wch: 42 }, // Metode Cek
+                { wch: 18 }, // Status Abnormality
+                { wch: 18 }, // Nomor Notif
+                { wch: 14 }, // Status Notif
+                { wch: 32 }, // Keterangan
+                { wch: 36 }, // Catatan Close
+                { wch: 35 }, // Link Foto Sebelum
+                { wch: 35 }, // Link Foto Sesudah
+                { wch: 35 }  // Link Foto Perbaikan
+            ];
+
+            XLSX.utils.book_append_sheet(wb, ws, "Input Laporan");
+            XLSX.writeFile(wb, `Laporan_CILT_Execution_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        function exportLaporanPDF() {
+            if (!isSupervisor()) {
+                showModal({ title: "Akses Ditolak", message: "User tidak diizinkan mengekspor data ke PDF.", type: "danger" });
+                return;
+            }
+            if (laporanSheet.length === 0) {
+                showModal({ title: "Data Kosong", message: "Tidak ada data laporan untuk diekspor.", type: "warning" });
+                return;
+            }
+
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                showModal({ title: "Library Belum Siap", message: "Library PDF (jsPDF) gagal dimuat. Periksa koneksi internet Anda.", type: "danger" });
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+            const tglCetak = new Date().toLocaleString('id-ID');
+            const totalAbnormal = laporanSheet.filter(i => String(i.abnormality).toLowerCase() === 'ya').length;
+            const totalNormal = laporanSheet.length - totalAbnormal;
+
+            doc.setFillColor(0, 139, 69);
+            doc.rect(14, 10, 269, 18, 'F');
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "bold");
+            doc.text("LAPORAN HASIL CHECKLIST & INSPEKSI MESIN (CILT EXECUTION)", 18, 18);
+
+            doc.setFontSize(8.5);
+            doc.setFont("helvetica", "normal");
+            doc.text(`PT. Herlina Indah  |  Dicetak: ${tglCetak}  |  Total: ${laporanSheet.length}  |  Normal: ${totalNormal}  |  Abnormality: ${totalAbnormal}`, 18, 24);
+
+            const tableHead = [[
+                "No", "ID Laporan", "PIC", "Tanggal", "Nama Part",
+                "Standar Cek", "Metode Cek", "Abnormal", "Nomor Notif", "Status", "Keterangan & Tindak Lanjut"
+            ]];
+
+            const tableBody = laporanSheet.map((item, idx) => {
+                const gabungKet = item.catatanClose && item.catatanClose !== "-"
+                    ? `${item.keterangan || "-"}\n[Close]: ${item.catatanClose}`
+                    : (item.keterangan || "-");
+                return [
+                    idx + 1,
+                    item.id,
+                    item.pic,
+                    formatTanggalRingkas(item.tanggalInput),
+                    item.namaPart,
+                    item.standarCek || "-",
+                    item.metodeCek || "-",
+                    item.abnormality,
+                    item.nomorEwo || "-",
+                    item.statusNotif || "-",
+                    gabungKet
+                ];
+            });
+
+            doc.autoTable({
+                startY: 32,
+                head: tableHead,
+                body: tableBody,
+                theme: 'grid',
+                styles: {
+                    fontSize: 7,
+                    cellPadding: 2,
+                    valign: 'top',
+                    overflow: 'linebreak',
+                    textColor: [30, 41, 59]
+                },
+                headStyles: {
+                    fillColor: [241, 245, 249],
+                    textColor: [15, 23, 42],
+                    fontStyle: 'bold',
+                    lineWidth: 0.2,
+                    lineColor: [203, 213, 225]
+                },
+                alternateRowStyles: {
+                    fillColor: [248, 250, 252]
+                },
+                columnStyles: {
+                    0: { cellWidth: 8, halign: 'center' },
+                    1: { cellWidth: 24 },
+                    2: { cellWidth: 20 },
+                    3: { cellWidth: 22 },
+                    4: { cellWidth: 28, fontStyle: 'bold' },
+                    5: { cellWidth: 38 },
+                    6: { cellWidth: 42 },
+                    7: { cellWidth: 14, halign: 'center' },
+                    8: { cellWidth: 20 },
+                    9: { cellWidth: 14, halign: 'center' },
+                    10: { cellWidth: 39 }
+                },
+                didParseCell: function(data) {
+                    if (data.section === 'body' && data.column.index === 7) {
+                        if (String(data.cell.raw).toLowerCase() === 'ya') {
+                            data.cell.styles.textColor = [225, 29, 72];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else {
+                            data.cell.styles.textColor = [5, 150, 105];
+                        }
+                    }
+                    if (data.section === 'body' && data.column.index === 9) {
+                        const val = String(data.cell.raw).toLowerCase();
+                        if (val === 'closed') {
+                            data.cell.styles.textColor = [5, 150, 105];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (val === 'open') {
+                            data.cell.styles.textColor = [225, 29, 72];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                },
+                didDrawPage: function(data) {
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFontSize(8);
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(
+                        `Halaman ${data.pageNumber} dari ${pageCount} - CILT Execution PT. Herlina Indah`,
+                        14,
+                        doc.internal.pageSize.height - 8
+                    );
+                }
+            });
+
+            doc.save(`Laporan_CILT_Execution_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        // =========================================================================
+        // 10. MODAL KUSTOM & HELPER KEAMANAN HTML
+        // =========================================================================
+        function showModal({ title, message, type = "info", confirmText = "OK", onConfirm = null }) {
+            const modal = document.getElementById('customModal');
+            const iconEl = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+            const actionsEl = document.getElementById('modalActions');
+            if (!modal || !actionsEl) return;
+
+            if (titleEl) titleEl.textContent = title;
+            if (msgEl) msgEl.textContent = message;
+
+            if (iconEl) {
+                if (type === "success") {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-100 text-emerald-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if (type === "danger") {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-rose-100 text-rose-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                } else if (type === "warning") {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-amber-100 text-amber-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+                } else {
+                    iconEl.className = "w-10 h-10 rounded-full flex items-center justify-center text-lg bg-emerald-100 text-emerald-600";
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+                }
+            }
+
+            actionsEl.innerHTML = "";
+            if (onConfirm) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = "button";
+                cancelBtn.className = "px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition";
+                cancelBtn.textContent = "Batal";
+                cancelBtn.onclick = closeModal;
+                actionsEl.appendChild(cancelBtn);
+            }
+
+            const okBtn = document.createElement('button');
+            okBtn.type = "button";
+            okBtn.className = `px-4 py-2 rounded-xl text-white text-xs font-semibold transition ${
+                type === 'danger' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
+            }`;
+            okBtn.textContent = confirmText;
+            okBtn.onclick = () => {
+                closeModal();
+                if (onConfirm) onConfirm();
+            };
+            actionsEl.appendChild(okBtn);
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            safeAddClass('customModal', 'hidden');
+        }
+
+        function openImagePreview(src, caption) {
+            if (!src) return;
+            const imgEl = document.getElementById('previewModalImg');
+            if (imgEl) imgEl.src = resolveDriveImageUrl(src);
+            safeSetText('previewModalCaption', caption || "");
+            safeRemoveClass('imagePreviewModal', 'hidden');
+        }
+
+        function closeImagePreview() {
+            safeAddClass('imagePreviewModal', 'hidden');
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return "";
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // =========================================================================
+        // 11. INISIALISASI EVENT LISTENER UTAMA SETELAH DOM SIAP
+        // =========================================================================
+        function initAllEventListeners() {
+            checkTrialStatus();
+            updateApiConfigUI();
+
+            // 1. Form Login
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const usernameInput = document.getElementById('loginUsername')?.value.trim() || "";
+                    const passwordInput = document.getElementById('loginPassword')?.value.trim() || "";
+                    const btnSubmit = document.getElementById('btnLoginSubmit');
+
+                    if (!isApiUrlConfigured()) {
+                        safeRemoveClass('apiConfigPanel', 'hidden');
+                        showLoginError("Silakan masukkan URL Web App Google Apps Script terlebih dahulu.");
+                        return;
+                    }
+
+                    safeAddClass('loginError', 'hidden');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Memverifikasi...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('verifyLogin', "", {
+                            username: usernameInput,
+                            password: passwordInput
+                        });
+
+                        if (res && res.success) {
+                            currentUser = res.user;
+                            sessionToken = res.token;
+                            safeAddClass('loginSection', 'hidden');
+                            safeRemoveClass('appSection', 'hidden');
+                            safeSetText('currentUserDisplay', `${currentUser.username} (${currentUser.role})`);
+
+                            applyRolePermissions();
+                            resetLaporanForm();
+                            await loadDataFromServer();
+                            switchTab('laporan');
+                        } else {
+                            showLoginError((res && res.message) || "Nama pengguna atau password salah!");
+                        }
+                    } catch (err) {
+                        showLoginError(err.message || String(err));
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = `<span>Masuk ke Aplikasi</span> <i class="fa-solid fa-arrow-right"></i>`;
+                        }
+                    }
+                });
+            }
+
+            // 2. Form Database (Supervisor / Admin)
+            const databaseForm = document.getElementById('databaseForm');
+            if (databaseForm) {
+                databaseForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    if (!isSupervisor()) {
+                        showModal({ title: "Akses Ditolak", message: "Hanya Supervisor atau Admin yang dapat mengubah Sheet Database.", type: "danger" });
+                        return;
+                    }
+
+                    const originalId = document.getElementById('dbOriginalId')?.value.trim() || "";
+                    const partId = document.getElementById('dbPartIdInput')?.value.trim() || "";
+                    const namaPart = document.getElementById('dbNamaPart')?.value.trim() || "";
+                    const metodeCek = document.getElementById('dbMetodeCek')?.value.trim() || "";
+                    const standarCek = document.getElementById('dbStandarCek')?.value.trim() || "";
+                    const pic = document.getElementById('dbPic')?.value.trim() || "";
+                    const btnSubmit = document.getElementById('btnSubmitDb');
+
+                    const originalBtnHtml = btnSubmit ? btnSubmit.innerHTML : "Simpan ke Database";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('saveDatabaseRecord', sessionToken, {
+                            originalId,
+                            id: partId,
+                            namaPart,
+                            image: tempImages.dbPart,
+                            metodeCek,
+                            standarCek,
+                            pic
+                        });
+
+                        resetDatabaseForm();
+                        await loadDataFromServer();
+
+                        showModal({
+                            title: "Tersimpan ke Google Sheets",
+                            message: (res && res.message) || `Data part "${namaPart}" berhasil disimpan.`,
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Menyimpan", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalBtnHtml;
+                        }
+                    }
+                });
+            }
+
+            // 3. Form Input Laporan
+            const laporanForm = document.getElementById('laporanForm');
+            if (laporanForm) {
+                laporanForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const id = document.getElementById('lapId')?.value || "";
+                    const pic = document.getElementById('lapPic')?.value || "";
+                    const tanggalInput = document.getElementById('lapTanggal')?.value || "";
+                    const partId = document.getElementById('lapNamaPart')?.value || "";
+                    const partData = databaseSheet.find(item => item.id === partId);
+
+                    if (!partData) {
+                        showModal({ title: "Pilih Nama Part", message: "Silakan pilih Nama Part dari daftar terlebih dahulu.", type: "warning" });
+                        return;
+                    }
+
+                    const checkedRadio = document.querySelector('input[name="abnormalityStatus"]:checked');
+                    const abnormality = checkedRadio ? checkedRadio.value : "Tidak";
+                    const nomorEwo = abnormality === "Ya" ? (document.getElementById('lapNomorEwo')?.value.trim() || "") : "-";
+                    const keterangan = document.getElementById('lapKeterangan')?.value.trim() || "-";
+
+                    if (abnormality === "Ya" && !nomorEwo) {
+                        showModal({ title: "Nomor Notif Wajib Diisi", message: "Karena terdapat Abnormality (Ya), silakan masukkan Nomor Notif.", type: "danger" });
+                        return;
+                    }
+
+                    const btnSubmit = document.getElementById('btnSubmitLaporan');
+                    const originalBtnHtml = btnSubmit ? btnSubmit.innerHTML : "Simpan ke Sheet Input Laporan";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Mengunggah & Menyimpan...</span>`;
+                    }
+
+                    const newRecord = {
+                        id,
+                        pic,
+                        tanggalInput,
+                        namaPart: partData.namaPart,
+                        imageDb: partData.image,
+                        standarCek: partData.standarCek,
+                        metodeCek: partData.metodeCek,
+                        fotoSebelum: tempImages.sebelum,
+                        fotoSesudah: tempImages.sesudah,
+                        abnormality,
+                        nomorEwo,
+                        keterangan
+                    };
+
+                    try {
+                        const res = await callGasApi('saveLaporanRecord', sessionToken, newRecord);
+                        resetLaporanForm();
+                        await loadDataFromServer();
+
+                        showModal({
+                            title: "Laporan Tersimpan",
+                            message: (res && res.message) || `Checklist dengan ID ${id} telah tersimpan di Google Sheets.`,
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Menyimpan Laporan", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalBtnHtml;
+                        }
+                    }
+                });
+            }
+
+            // 4. Form Closing Nomor Notif
+            const closeNotifForm = document.getElementById('closeNotifForm');
+            if (closeNotifForm) {
+                closeNotifForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    if (!canCloseNotif()) {
+                        showModal({ title: "Akses Ditolak", message: "Anda tidak memiliki izin untuk menutup Nomor Notif.", type: "danger" });
+                        return;
+                    }
+
+                    const id = document.getElementById('closeNotifLapId')?.value.trim() || "";
+                    const catatanPerbaikan = document.getElementById('closeNotifCatatan')?.value.trim() || "";
+
+                    if (!catatanPerbaikan) {
+                        showModal({ title: "Catatan Wajib Diisi", message: "Silakan isi tindakan perbaikan sebelum menutup Nomor Notif.", type: "warning" });
+                        return;
+                    }
+
+                    const btnSubmit = document.getElementById('btnSubmitCloseNotif');
+                    const originalHtml = btnSubmit ? btnSubmit.innerHTML : "Konfirmasi Close Notif";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses Close...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('closeNotifRecord', sessionToken, {
+                            id,
+                            catatanPerbaikan,
+                            fotoPerbaikan: tempImages.closePerbaikan || ""
+                        });
+
+                        closeNotifModalDialog();
+                        await loadDataFromServer();
+
+                        showModal({
+                            title: "Nomor Notif Ditutup",
+                            message: (res && res.message) || "Status Nomor Notif berhasil diubah menjadi Closed.",
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Closing Notif", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalHtml;
+                        }
+                    }
+                });
+            }
+
+            // 5. Form Edit Data Input Laporan (Keterangan & Status Notif Maintenance)
+            const editLaporanForm = document.getElementById('editLaporanForm');
+            if (editLaporanForm) {
+                editLaporanForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    if (!canCloseNotif()) {
+                        showModal({ title: "Akses Ditolak", message: "Anda tidak memiliki izin untuk mengedit laporan.", type: "danger" });
+                        return;
+                    }
+
+                    const id = document.getElementById('editLapId')?.value.trim() || "";
+                    const abnormality = document.getElementById('editLapAbnormality')?.value || "Tidak";
+                    const nomorEwo = abnormality === "Ya" ? (document.getElementById('editLapNomorNotif')?.value.trim() || "") : "-";
+                    const keterangan = document.getElementById('editLapKeterangan')?.value.trim() || "-";
+                    const statusNotif = abnormality === "Ya" ? (document.getElementById('editLapStatusNotif')?.value || "Open") : "-";
+                    const catatanClose = document.getElementById('editLapCatatanClose')?.value.trim() || "-";
+
+                    if (abnormality === "Ya" && !nomorEwo) {
+                        showModal({ title: "Nomor Notif Wajib Diisi", message: "Silakan isi Nomor Notif untuk status Abnormality = Ya.", type: "warning" });
+                        return;
+                    }
+
+                    const btnSubmit = document.getElementById('btnSubmitEditLaporan');
+                    const originalHtml = btnSubmit ? btnSubmit.innerHTML : "Simpan Perubahan";
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menyimpan...</span>`;
+                    }
+
+                    try {
+                        const res = await callGasApi('updateLaporanRecord', sessionToken, {
+                            id,
+                            abnormality,
+                            nomorEwo,
+                            keterangan,
+                            statusNotif,
+                            catatanClose,
+                            fotoPerbaikan: tempImages.editPerbaikan || ""
+                        });
+                        closeEditLaporanModal();
+                        await loadDataFromServer();
+                        showModal({
+                            title: "Laporan Diperbarui",
+                            message: (res && res.message) || "Data laporan & keterangan berhasil diperbarui.",
+                            type: "success"
+                        });
+                    } catch (err) {
+                        showModal({ title: "Gagal Memperbarui", message: err.message || String(err), type: "danger" });
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalHtml;
+                        }
+                    }
+                });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAllEventListeners);
+        } else {
+            initAllEventListeners();
+        }
+    </script>
+</body>
+</html>
